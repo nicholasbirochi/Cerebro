@@ -1,0 +1,37 @@
+# Public distribution: only explicitly listed files may be committed.
+*
+!.gitignore
+!README.md
+!docs/
+!docs/ARQUITETURA.md
+!examples/
+!media/
+!media/arquitetura.mp4
+!tools/
+!tools/auxiliares.json
+!tools/auxiliares.py
+!tools/backup_cerebro.py
+!tools/cerebro.py
+!tools/test_auxiliares.py
+!tools/test_backup_cerebro.py
+!tools/test_cerebro.py
+!examples/cofre/
+!examples/cofre/00 - Regras para Agentes/
+!examples/cofre/00 - Regras para Agentes/.gitkeep
+!examples/cofre/00 - Regras para Agentes/Protocolo dos Agentes.md
+!examples/cofre/01 - Índices/
+!examples/cofre/01 - Índices/.gitkeep
+!examples/cofre/01 - Índices/Índice de regras.md
+!examples/cofre/01 - Índices/Índice principal.md
+!examples/cofre/02 - Projetos/
+!examples/cofre/02 - Projetos/.gitkeep
+!examples/cofre/03 - Graphify e Mapas de Projeto/
+!examples/cofre/03 - Graphify e Mapas de Projeto/.gitkeep
+!examples/cofre/04 - Decisões Técnicas/
+!examples/cofre/04 - Decisões Técnicas/.gitkeep
+!examples/cofre/05 - Padrões e Preferências/
+!examples/cofre/05 - Padrões e Preferências/.gitkeep
+!examples/cofre/06 - Logs de Tarefas/
+!examples/cofre/06 - Logs de Tarefas/.gitkeep
+!examples/cofre/07 - Templates/
+!examples/cofre/07 - Templates/.gitkeep
