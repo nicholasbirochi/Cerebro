@@ -8,20 +8,25 @@ Esta edição pública contém ferramentas, um cofre sintético de exemplo, docu
 
 ```mermaid
 flowchart LR
-    P[Usuário] --> A[Claude Code ou Codex: agente principal]
-    A <--> C[Cérebro: regras e conhecimento]
-    A -->|tarefa delimitada| CP[Copilot: auxiliar]
-    CP -->|resposta para revisão| A
-    A --> R[Roteador de auxiliares]
+    P[Usuário] --> CX[Codex: principal]
+    P --> CL[Claude Code: principal]
+    CX <--> C[Cérebro: regras e conhecimento]
+    CL <--> C
+    CX -->|chamada direta, tarefa delimitada| CP[Copilot: auxiliar]
+    CL -->|chamada direta, tarefa delimitada| CP
+    CX --> R[auxiliares.py: Ollama ou Nemotron]
+    CL --> R
     R --> O[Ollama e modelos Qwen locais]
-    R --> OC[OpenCode: ponte opcional]
-    OC --> N[Nemotron: acesso gratuito condicionado]
+    R --> OC[OpenCode: ponte para NVIDIA]
+    OC --> N[Nemotron: inferência validada em 13/10/2026]
     G[Graphify: mapas de código] --> C
     NO[Noah: voz e texto, em desenvolvimento] <--> C
     OC --> U[Codenotch: uso e limites]
 ```
 
-O Copilot é uma ferramenta auxiliar acionada pelo principal. Consulta, delegação, validação e registro dependem da implementação e do cumprimento das instruções; o mapa apresenta os fluxos configurados.
+Claude Code e Codex são entradas alternativas: o usuário escolhe qual conduz o pedido. Ambos consultam o Cérebro e podem acionar auxiliares. A resposta de qualquer auxiliar retorna ao principal escolhido para revisão.
+
+O Copilot é acionado diretamente pelo principal, após conferir a franquia. O script `auxiliares.py` encaminha somente para Ollama ou Nemotron; ele não executa o Copilot. Consulta, delegação, validação e registro dependem da implementação e do cumprimento das instruções.
 
 [Assistir ao vídeo da arquitetura](media/arquitetura.mp4)
 
@@ -42,7 +47,9 @@ O padrão desta distribuição é `examples/cofre`. Para usar seu próprio cofre
 
 `tools/auxiliares.py` seleciona Qwen 7B para tarefas mecânicas e Qwen 14B para código, considerando modelos adequados já residentes. O 30B não é carregado automaticamente. O Ollama e os modelos precisam estar instalados pelo usuário; o script não baixa modelos.
 
-A rota remota fica desativada no exemplo. O uso de Nemotron depende de acesso gratuito elegível, credencial local e perfil isolado do OpenCode; autenticação e perfis privados não são distribuídos aqui. Não há fallback para um endpoint pago. Os testes simulam os serviços e não fazem inferência real.
+Na máquina apresentada, o Nemotron respondeu via OpenCode em 13/10/2026: 56 tokens de entrada, 2 de saída e cerca de 19 segundos. Isso confirma a chamada nessa data; conexão, credencial e cota continuam necessárias.
+
+A distribuição pública mantém a rota remota desativada no exemplo, pois não inclui credenciais nem o perfil privado do OpenCode. O uso de Nemotron depende de acesso gratuito elegível, credencial local e perfil isolado do OpenCode; autenticação e perfis privados não são distribuídos aqui. Não há fallback para um endpoint pago. Os testes simulam os serviços e não fazem inferência real.
 
 ## Backup e restauração
 
