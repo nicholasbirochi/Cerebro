@@ -4,7 +4,7 @@ Sistema local de conhecimento compartilhado entre agentes de programação. Regr
 
 Esta edição pública contém ferramentas, um cofre sintético de exemplo, documentação e o vídeo da arquitetura. O cofre pessoal, os backups reais, credenciais, configurações de contas e referências de voz ficam fora do repositório.
 
-## Arquitetura
+## Arquitetura centralizada proposta
 
 ```mermaid
 flowchart LR
@@ -12,21 +12,21 @@ flowchart LR
     P --> CL[Claude Code: principal]
     CX <--> C[Cérebro: regras e conhecimento]
     CL <--> C
-    CX -->|chamada direta, tarefa delimitada| CP[Copilot: auxiliar]
-    CL -->|chamada direta, tarefa delimitada| CP
-    CX --> R[auxiliares.py: Ollama ou Nemotron]
+    CX --> R[Roteador central: tarefa, cota e recursos]
     CL --> R
-    R --> O[Ollama e modelos Qwen locais]
-    R --> OC[OpenCode: ponte para NVIDIA]
-    OC --> N[Nemotron: inferência validada em 13/10/2026]
+    R -.->|integração pendente| CP[Copilot: auxiliar]
+    R --> O[Ollama e Qwen locais]
+    R --> OC[OpenCode]
+    OC --> N[Nemotron]
     G[Graphify: mapas de código] --> C
     NO[Noah: voz e texto, em desenvolvimento] <--> C
-    OC --> U[Codenotch: uso e limites]
 ```
 
-Claude Code e Codex são entradas alternativas: o usuário escolhe qual conduz o pedido. Ambos consultam o Cérebro e podem acionar auxiliares. A resposta de qualquer auxiliar retorna ao principal escolhido para revisão.
+Claude Code e Codex são entradas alternativas. O desenho apresenta a arquitetura-alvo definida pelo usuário: toda delegação passa pelo roteador, que escolhe Copilot, Ollama ou OpenCode/Nemotron conforme a tarefa, a franquia disponível e os recursos locais. A resposta retorna ao principal escolhido para revisão.
 
-O Copilot é acionado diretamente pelo principal, após conferir a franquia. O script `auxiliares.py` encaminha somente para Ollama ou Nemotron; ele não executa o Copilot. Consulta, delegação, validação e registro dependem da implementação e do cumprimento das instruções.
+**Estado da implementação:** `tools/auxiliares.py` já encaminha para Ollama e Nemotron via OpenCode. O Copilot ainda precisa ser integrado a esse ponto único; a ligação pontilhada representa essa pendência. Não há execução automática de Copilot por esse script na versão publicada.
+
+Codenotch fica fora do mapa de mensagens. Monitoramento de consumo é uma camada separada e não encaminha as tarefas. O vídeo não afirma cobertura de provedores que não foi verificada.
 
 [Assistir ao vídeo da arquitetura](media/arquitetura.mp4)
 
