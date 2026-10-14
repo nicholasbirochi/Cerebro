@@ -4,6 +4,18 @@ Sistema local de conhecimento compartilhado entre agentes de programação. Regr
 
 Esta edição pública contém ferramentas, um cofre sintético de exemplo, documentação e o vídeo da arquitetura. O cofre pessoal, os backups reais, credenciais, configurações de contas e referências de voz ficam fora do repositório.
 
+## Apresentação
+
+Vídeo animado da arquitetura, com a voz do Noah, e um resumo visual de como a delegação pode preservar a cota do Claude ou Codex.
+
+**[Abrir o vídeo (MP4, 3min18s)](media/arquitetura.mp4)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
+
+[![One pager: comparação Antes e Agora, exemplos de delegação e equivalências de API e assinatura](media/one-pager.png)](media/one-pager.png)
+
+[Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
+
+O one pager apresenta uma **simulação**, com 30% menos tokens no principal. **A mensalidade permanece igual: R$ 0 de desconto.** Os valores de API são equivalências hipotéticas de processamento. Menos espera e mais entregas são benefícios potenciais, ainda não medidos.
+
 ## Arquitetura de delegação
 
 ```mermaid
@@ -27,12 +39,6 @@ Claude Code e Codex são entradas alternativas. O desenho apresenta a arquitetur
 **Estado da implementação:** `tools/auxiliares.py` reúne Copilot, Ollama e Nemotron via OpenCode. São três destinos na mesma camada de auxiliares. O principal decide quando delegar; o script escolhe o destino elegível e devolve a resposta para revisão. O hook orienta o agente a usar o roteador e não intercepta automaticamente cada mensagem do chat.
 
 Codenotch fica fora do mapa de mensagens. Monitoramento de consumo é uma camada separada e não encaminha as tarefas. O vídeo não afirma cobertura de provedores que não foi verificada.
-
-[Assistir ao vídeo da arquitetura](media/arquitetura.mp4)
-
-![Simulação de uso do principal antes e depois da delegação, com exemplos](media/one-pager.png)
-
-[One pager editável](media/one-pager.pptx). O cenário de 30% é ilustrativo: não mede economia observada, desconto na mensalidade nem espera real por cota.
 
 ## Experimentar sem acessar um cofre pessoal
 
