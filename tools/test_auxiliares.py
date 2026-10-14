@@ -28,6 +28,8 @@ class RoutingTests(unittest.TestCase):
         # Never touch the real Keychain in tests.
         patcher = patch.object(a, "keychain_key", return_value="")
         patcher.start(); self.addCleanup(patcher.stop)
+        copilot = patch.object(a, "copilot_available", return_value=False)
+        copilot.start(); self.addCleanup(copilot.stop)
 
     def test_missing_remote_profile_fails_before_subprocess(self):
         (Path(a.__file__).parent / 'opencode/opencode.json').unlink()
@@ -222,6 +224,76 @@ class RoutingTests(unittest.TestCase):
         with patch.dict(os.environ, {"NVIDIA_API_KEY": "fake"}), patch.object(a, "infer_remote", return_value=("", 1, 0)), \
              patch("sys.stdin", io.StringIO("prompt")), contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(a.main(["--provedor", "nemotron"]), 1)
+
+
+class CopilotRoutingTests(unittest.TestCase):
+    def test_third_destination_and_local_mechanical_work(self):
+        self.assertEqual(a.choose("codigo", [], [], False, True), ("copilot", "auto"))
+        self.assertEqual(a.choose("analise", [], [], True, True), ("nemotron", a.REMOTE_MODEL))
+        self.assertEqual(a.choose("analise", [], [], False, True), ("copilot", "auto"))
+        self.assertEqual(a.choose("mecanica", ["qwen2.5-coder:7b"], [], True, True),
+                         ("ollama", "qwen2.5-coder:7b"))
+
+    def test_quota_gate_requires_included_balance_and_disabled_overage(self):
+        for quota, expected in [
+            ({"remaining": 184, "overage_permitted": False}, True),
+            ({"remaining": 29, "overage_permitted": False}, False),
+            ({"remaining": 184, "overage_permitted": True}, False),
+            ({"remaining": 184}, False), ({"remaining": "184", "overage_permitted": False}, False),
+        ]:
+            run = SimpleNamespace(returncode=0, stdout=json.dumps({"quota_snapshots": {"chat": quota}}))
+            with self.subTest(quota=quota), patch.object(a.shutil, "which", return_value="tool"), \
+                 patch.object(Path, "read_text", return_value='{"copilot_habilitado":true}'), \
+                 patch.object(a.subprocess, "run", return_value=run):
+                self.assertEqual(a.copilot_available(), expected)
+
+    def test_copilot_isolated_no_tools_stdin_and_no_inherited_provider(self):
+        events = [{"type": "assistant.turn_start"},
+                  {"type": "assistant.message", "data": {"content": "4", "toolRequests": []}}]
+        runs = [SimpleNamespace(returncode=0, stdout="fake-login-token"),
+                SimpleNamespace(returncode=0, stdout="\n".join(map(json.dumps, events)))]
+        usage = json.dumps({"totalUserRequests":1,"modelMetrics":{"model":{"requests":{"count":1}}},
+                            "currentModel":"model", "lastCallInputTokens":4,"lastCallOutputTokens":1})
+        with patch.object(a.subprocess, "run", side_effect=runs) as invoke, \
+             patch.object(Path, "read_text", return_value=usage), \
+             patch.dict(os.environ, {"COPILOT_ALLOW_ALL": "true", "COPILOT_PROVIDER_BASE_URL": "paid", "NVIDIA_API_KEY": "private-fake"}):
+            self.assertEqual(a.infer_copilot("2+2"), ("4", 4, 1, "model"))
+        args, kwargs = invoke.call_args
+        self.assertTrue(kwargs["input"].endswith("2+2"))
+        self.assertNotIn("--prompt", args[0])
+        self.assertIn("--available-tools=__cerebro_no_tools__", args[0])
+        self.assertNotIn("fake-login-token", " ".join(args[0]))
+        self.assertNotIn("2+2", " ".join(args[0]))
+        self.assertNotIn("COPILOT_PROVIDER_BASE_URL", kwargs["env"])
+        self.assertNotIn("COPILOT_ALLOW_ALL", kwargs["env"])
+        self.assertNotIn("NVIDIA_API_KEY", kwargs["env"])
+
+    def test_copilot_rejects_tools_and_additional_turns_without_retry(self):
+        for extra in [{"type": "tool.execution_start"}, {"type": "assistant.turn_start"}]:
+            events = [{"type": "assistant.turn_start"}, extra]
+            runs = [SimpleNamespace(returncode=0, stdout="fake-login-token"),
+                    SimpleNamespace(returncode=0, stdout="\n".join(map(json.dumps, events)))]
+            with self.subTest(extra=extra), patch.object(a.subprocess, "run", side_effect=runs) as invoke:
+                with self.assertRaises(a.RouterError): a.infer_copilot("pergunta pública")
+                self.assertEqual(invoke.call_count, 2)
+
+    def test_explicit_copilot_without_quota_never_infers(self):
+        with patch.object(a, "copilot_available", return_value=False), \
+             patch.object(a, "infer_copilot") as infer, patch.object(a, "nvidia_key") as key, \
+             patch("sys.stdin", io.StringIO("2+2")), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(a.main(["--provedor", "copilot"]), 1)
+        infer.assert_not_called(); key.assert_not_called()
+
+    def test_auto_code_uses_copilot_and_error_has_no_fallback(self):
+        with patch.object(a, "copilot_available", return_value=True), \
+             patch.object(a, "local_inventory", return_value=([], [])), \
+             patch.object(a, "nvidia_key") as key, \
+             patch.object(a, "infer_copilot", side_effect=a.RouterError("falha")) as infer, \
+             patch.object(a, "infer_local") as local, patch.object(a, "infer_remote") as remote, \
+             patch("sys.stdin", io.StringIO("2+2")), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(a.main(["--tipo", "codigo"]), 1)
+        infer.assert_called_once(); local.assert_not_called(); remote.assert_not_called(); key.assert_not_called()
+
 
 
 if __name__ == "__main__":
