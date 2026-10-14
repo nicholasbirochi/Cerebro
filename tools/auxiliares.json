@@ -1,1 +1,4 @@
-{"nemotron_habilitado": false}
+{
+  "nemotron_habilitado": false,
+  "copilot_habilitado": false
+}

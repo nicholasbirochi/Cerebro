@@ -2,13 +2,13 @@
 
 O usuário escolhe Claude Code ou Codex para conduzir o pedido. O principal consulta o Cérebro, envia uma tarefa delimitada ao roteador e revisa o resultado. As duas entradas são alternativas.
 
-## Arquitetura-alvo
+## Arquitetura de delegação
 
 O roteador concentra três caminhos: Copilot, Ollama e OpenCode/Nemotron. A escolha considera tipo de tarefa, franquia incluída atual, adequação do modelo e memória disponível. A resposta volta pelo roteador ao principal. As condições de custo e segurança prevalecem sobre a preferência por um provedor.
 
-## Implementado e pendente
+## Três destinos implementados
 
-`tools/auxiliares.py` trata Ollama e Nemotron via OpenCode. Integrar Copilot nesse ponto único ainda é uma tarefa de implementação. O vídeo e o diagrama sinalizam essa ligação como pendente, sem afirmar automação que ainda não existe. Enquanto isso, a chamada direta existente ao Copilot não é o fluxo-alvo desenhado.
+`tools/auxiliares.py` concentra Ollama, Copilot e Nemotron via OpenCode. A linha do Copilot é contínua, como as demais saídas. A escolha muda conforme a tarefa e a elegibilidade; isso não muda a camada do auxiliar. Copilot requer franquia incluída verificada e overage desativado, usa Auto/Efficiency e executa uma resposta textual sem ferramentas. A integração foi validada em 14/10/2026. O principal decide quando delegar: não existe interceptação automática de toda mensagem do chat.
 
 Nemotron respondeu em inferência real via OpenCode em 13/10/2026 (56 tokens de entrada e 2 de saída, aproximadamente 19 segundos). A configuração privada da máquina o habilita; o exemplo público permanece desativado até o usuário fornecer sua própria configuração elegível.
 

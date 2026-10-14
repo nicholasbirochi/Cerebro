@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import ssl
 import sqlite3
 import subprocess
@@ -82,15 +83,37 @@ def remote_enabled():
         return False
 
 
+def copilot_available():
+    """Only included balance with overage disabled; never alter billing."""
+    if not shutil.which("copilot") or not shutil.which("gh"):
+        return False
+    try:
+        config = json.loads(Path(__file__).with_name("auxiliares.json").read_text())
+        if config.get("copilot_habilitado") is not True:
+            return False
+        run = subprocess.run(["gh", "api", "copilot_internal/user"],
+                             capture_output=True, text=True, timeout=15)
+        quota = json.loads(run.stdout)["quota_snapshots"]["chat"]
+        return (run.returncode == 0 and quota.get("overage_permitted") is False
+                and isinstance(quota.get("remaining"), (int, float))
+                and quota["remaining"] >= 30)
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError):
+        return False
+
+
 def family(name):
     m = re.search(r"(?<!\d)(7|14|30)b(?:[-:]|$)", name.lower())
     return int(m.group(1)) if m else 0
 
 
-def choose(tipo, installed, loaded, has_key):
+def choose(tipo, installed, loaded, has_key, has_copilot=False):
     desired = "qwen2.5-coder:7b" if tipo == "mecanica" else "qwen2.5-coder:14b"
+    if tipo == "codigo" and has_copilot:
+        return "copilot", "auto"
     if tipo == "analise" and has_key:
         return "nemotron", REMOTE_MODEL
+    if tipo == "analise" and has_copilot:
+        return "copilot", "auto"
     if loaded:
         candidates = [m for m in loaded if family(m) in (7, 14, 30)]
         preferred = (7, 14, 30) if tipo == "mecanica" else (14, 30, 7)
@@ -100,12 +123,16 @@ def choose(tipo, installed, loaded, has_key):
                 return "ollama", match
         if has_key:
             return "nemotron", REMOTE_MODEL
+        if has_copilot:
+            return "copilot", "auto"
         raise RouterError("Há outro modelo local carregado e nenhum modelo adequado residente; valide o acesso gratuito NVIDIA ou libere o Ollama.")
     match = next((m for m in installed if m == desired or m.startswith(desired + "-")), None)
     if match:
         return "ollama", match
     if has_key:
         return "nemotron", REMOTE_MODEL
+    if has_copilot:
+        return "copilot", "auto"
     raise RouterError("Modelo local necessário indisponível e acesso NVIDIA não configurado ou não validado.")
 
 
@@ -131,6 +158,53 @@ def infer_local(model, prompt):
         "keep_alive": "2m", "options": {"num_ctx": 8192, "num_predict": MAX_OUTPUT},
     })
     return data.get("response", ""), data.get("prompt_eval_count"), data.get("eval_count")
+
+
+def infer_copilot(prompt):
+    token_run = subprocess.run(["gh", "auth", "token", "--hostname", "github.com"],
+                               capture_output=True, text=True, timeout=10)
+    if token_run.returncode or not token_run.stdout.strip():
+        raise RouterError("Login do Copilot indisponível; nenhuma inferência iniciada.")
+    with tempfile.TemporaryDirectory(prefix="cerebro-copilot-aux-") as directory:
+        home = Path(directory)
+        (home / "config.json").write_text(json.dumps({
+            "model": "auto", "autoTier": "efficiency", "continueOnAutoMode": False,
+            "autoUpdate": False, "defaultMode": "interactive"}))
+        env = {k: v for k, v in os.environ.items() if k in
+               ("PATH", "HOME", "TMPDIR", "LANG", "LC_ALL")}
+        env.update(COPILOT_HOME=directory, GH_TOKEN=token_run.stdout.strip(),
+                   COPILOT_AUTO_UPDATE="false")
+        # An empty allowlist enables defaults in CLI 1.0.92; an impossible name disables every tool.
+        args = ["copilot", "--model", "auto", "--auto-tier", "efficiency",
+                "--available-tools=__cerebro_no_tools__", "--disable-builtin-mcps",
+                "--no-custom-instructions", "--no-auto-update", "--no-remote", "--no-remote-export",
+                "--no-ask-user", "--no-experimental", "--no-color", "--stream", "off",
+                "--max-ai-credits", "30", "--output-format", "json",
+                "--usage-output-file", str(home / "usage.json")]
+        try:
+            # Piped stdin is the prompt; --prompt would replace it in this CLI.
+            run = subprocess.run(args, input=SYSTEM + " Responda em até 1024 tokens.\n\n" + prompt,
+                                 capture_output=True, text=True,
+                                 cwd=directory, env=env, timeout=100)
+        except subprocess.TimeoutExpired:
+            raise RouterError("Copilot excedeu o tempo; sem nova tentativa ou fallback.") from None
+        if run.returncode:
+            raise RouterError("Copilot não concluiu; sem nova tentativa ou fallback. Confira o acesso incluído.")
+        events = [json.loads(line) for line in run.stdout.splitlines() if line.strip()]
+        if any(event.get("type") in ("tool.execution_start", "subagent.started", "session.error") for event in events):
+            raise RouterError("Copilot tentou uma ação fora da resposta textual delimitada.")
+        turns = [e for e in events if e.get("type") == "assistant.turn_start"]
+        if len(turns) != 1:
+            raise RouterError("Copilot não registrou exatamente um turno; sem nova tentativa.")
+        messages = [e.get("data", {}) for e in events if e.get("type") == "assistant.message"]
+        response = "".join(m.get("content", "") for m in messages)
+        if any(m.get("toolRequests") for m in messages):
+            raise RouterError("Copilot solicitou ferramentas; resultado recusado.")
+        usage = json.loads((home / "usage.json").read_text())
+        calls = sum(m.get("requests", {}).get("count", 0) for m in usage.get("modelMetrics", {}).values())
+        if usage.get("totalUserRequests") != 1 or calls != 1:
+            raise RouterError("Copilot registrou mais de uma inferência ou uso não verificável.")
+        return response, usage.get("lastCallInputTokens"), usage.get("lastCallOutputTokens"), usage.get("currentModel")
 
 
 def infer_remote(prompt, key):
@@ -177,13 +251,18 @@ def infer_remote(prompt, key):
 def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--tipo", choices=("mecanica", "codigo", "analise"), default="codigo")
-    parser.add_argument("--provedor", choices=("auto", "ollama", "nemotron"), default="auto")
+    parser.add_argument("--provedor", choices=("auto", "ollama", "nemotron", "copilot"), default="auto")
     args = parser.parse_args(argv)
     prompt = sys.stdin.read(MAX_INPUT + 1)
     try:
         validate_prompt(prompt)
-        key = nvidia_key()
-        if args.provedor == "nemotron":
+        copilot = args.provedor in ("auto", "copilot") and copilot_available()
+        key = "" if args.provedor == "copilot" or (args.tipo == "codigo" and copilot) else nvidia_key()
+        if args.provedor == "copilot":
+            if not copilot:
+                raise RouterError("Copilot sem franquia incluída confirmada, margem de 30 créditos ou overage desativado; nenhuma inferência iniciada.")
+            provider, model = "copilot", "auto"
+        elif args.provedor == "nemotron":
             if not key:
                 raise RouterError("NVIDIA_API_KEY não configurada.")
             provider, model = "nemotron", REMOTE_MODEL
@@ -192,7 +271,8 @@ def main(argv=None):
                 installed, loaded = local_inventory()
             except Exception:
                 installed, loaded = [], []
-            provider, model = choose(args.tipo, installed, loaded, bool(key) and remote_enabled() and args.provedor == "auto")
+            provider, model = choose(args.tipo, installed, loaded,
+                bool(key) and remote_enabled() and args.provedor == "auto", copilot)
         started = time.monotonic()
         if provider == "ollama":
             lock = os.open("/tmp/cerebro-ollama-" + str(os.getuid()) + ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
@@ -206,6 +286,8 @@ def main(argv=None):
                 response, input_tokens, output_tokens = infer_local(model, prompt)
             finally:
                 os.close(lock)
+        elif provider == "copilot":
+            response, input_tokens, output_tokens, model = infer_copilot(prompt)
         else:
             response, input_tokens, output_tokens = infer_remote(prompt, key)
         if not isinstance(response, str) or not response.strip():
@@ -215,6 +297,9 @@ def main(argv=None):
                   "elapsed_seconds": round(time.monotonic() - started, 3)}
         if provider == "nemotron":
             result["via"] = "opencode"
+        elif provider == "copilot":
+            result["via"] = "copilot-cli"
+            result["routing_profile"] = "efficiency"
         print(json.dumps(result, ensure_ascii=False))
         return 0
     except Exception as exc:
