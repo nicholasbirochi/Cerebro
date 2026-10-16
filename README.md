@@ -53,6 +53,18 @@ python3 -m unittest discover -s tools -p 'test_*.py' -q
 
 O padrão desta distribuição é `examples/cofre`. Para usar seu próprio cofre privado, configure `CEREBRO_DIR` com um caminho absoluto fora do repositório público. As atualizações de notas existentes exigem o hash lido anteriormente e usam trava e escrita atômica.
 
+### Contexto em camadas
+
+`buscar --trechos` começa com até duas notas e 2.500 caracteres de saída total. Notas omitidas aparecem em uma contagem, sem uma lista longa de nomes. Use `--projeto` quando souber o projeto; leia primeiro o estado atual e a rota da tarefa no mapa.
+
+```bash
+python3 tools/cerebro.py buscar regras --trechos
+# Amplie se a primeira consulta não trouxer informação suficiente:
+python3 tools/cerebro.py buscar regras --trechos --max 5 --orcamento 12000
+```
+
+O modo sem `--trechos` preserva o padrão anterior de cinco notas e 12.000 caracteres de conteúdo selecionado. Os limites são de caracteres, não uma medição de tokens ou economia de assinatura. [Rotas por tarefa e monitoramento dos mapas](docs/ARQUITETURA.md#mapas-e-contexto-em-camadas) completam a navegação sem carregar o histórico inteiro.
+
 ## Auxiliares
 
 `tools/auxiliares.py` prefere Qwen 7B para tarefas mecânicas, Copilot elegível para código e Nemotron elegível para análise; sem esses acessos, considera os modelos locais adequados já residentes, incluindo Qwen 14B para código. O 30B não é carregado automaticamente. O Ollama e os modelos precisam estar instalados pelo usuário; o script não baixa modelos.
