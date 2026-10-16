@@ -1,47 +1,80 @@
-# Benchmark da saída de busca
+# Benchmark ampliado da saída de busca
 
-Medição executada em 16/10/2026 com Python 3.14. Compara a quantidade de texto devolvida pela ferramenta, sem chamar uma IA ou acessar um cofre pessoal.
+Executado em 16/10/2026 com Python 3.14 no macOS. O teste mede a saída da ferramenta usando apenas dados sintéticos. Não acessa cofre pessoal nem chama uma IA.
 
 ## Reproduzir
 
-Em um clone Git deste repositório que contenha a revisão de referência:
+Em um clone Git que contenha a revisão pública de referência:
+
+```bash
+python3 tools/benchmark_busca.py --ampliado
+```
+
+O script usa biblioteca padrão e Git local. Obtém `tools/cerebro.py` da revisão `40569e851506e3cd027004960f4b7d217bd0cb32` com `git show`, cria corpora temporários determinísticos e executa as duas versões contra os mesmos arquivos. Remove o temporário ao terminar. Não faz fetch, download, inferência ou backup pessoal. Um ZIP ou clone sem a revisão de referência não basta.
+
+[JSON completo da execução](benchmark-ampliado.json), incluindo consultas, hashes dos corpora, contagens e tempos observados. Os hashes do núcleo atual e do script permitem identificar exatamente a implementação avaliada.
+
+## Volume de conteúdo e saída retornada
+
+| Notas de conteúdo | Arquivos Markdown, incluindo protocolo | Caracteres no acervo | Bytes UTF-8 | Consultas |
+|---|---:|---:|---:|---:|
+| 40 | 41 | 105.046 | 110.089 | 8 |
+| 1.000 | 1.001 | 2.690.974 | 2.819.929 | 8 |
+| 10.000 | 10.001 | 26.918.974 | 28.208.929 | 8 |
+
+Cada escala reutiliza o prefixo de notas da anterior. Por isso, o maior acervo tem 10.000 notas de conteúdo, não 11.040 notas únicas. Seu tamanho é contado uma vez, sem multiplicar pelas consultas. O protocolo mínimo participa das contagens de caracteres e arquivos, mas não das notas de conteúdo.
+
+| Escala | Saída antes, caracteres | Saída atual, caracteres | Caracteres a menos | Redução |
+|---|---:|---:|---:|---:|
+| 40 notas, 8 consultas | 44.547 | 37.155 | 7.392 | 16,6% |
+| 1.000 notas, 8 consultas | 82.546 | 40.565 | 41.981 | 50,9% |
+| 10.000 notas, 8 consultas | 83.872 | 40.579 | 43.293 | 51,6% |
+| Total de 24 consultas | 210.965 | 118.299 | 92.666 | 43,9% |
+
+A redução total é `(210.965 − 118.299) ÷ 210.965 × 100`, arredondada. Ela pondera o volume efetivo de saída, sem tirar a média simples dos percentuais. Os totais somam consultas distintas e não são o tamanho de uma única resposta.
+
+## Consultas e equivalência
+
+Cada escala recebe as mesmas oito consultas, nesta ordem:
+
+1. `roteamento`
+2. `validacao`
+3. `interface`
+4. `publicacao`
+5. `roteamento validacao`
+6. `interface publicacao`
+7. `roteamento --projeto Demo-00`
+8. `inexistentezzz`, para conferir ausência de resultado
+
+Ambas as versões recebem `--trechos --max 5 --orcamento 12000`. As notas têm um tema explícito, projeto sintético e quatro linhas relevantes, com material complementar de tamanho variável. As seções neutras evitam misturar a redução de omissões com mudanças de relevância por histórico ou aliases. O objetivo desta bateria é medir o volume de texto devolvido preservando a seleção.
+
+**Todas as 24 comparações preservaram a mesma ordem de notas e os mesmos trechos, incluindo números de linha.** O script também confere a quantidade esperada de resultados, se cada nota pertence ao tema/projeto correto e o limite da saída. Falha se alguma dessas verificações divergir. Pontuações e resumos podem mudar e ficam fora da equivalência de conteúdo. As contagens de saída incluem omissões, resumo e quebras de linha.
+
+Os testes do núcleo cobrem separadamente termos curtos, aliases, prioridade do estado atual e resultados históricos. A equivalência deste corpus não comprova a qualidade geral das respostas de uma IA.
+
+## Tempos observados
+
+O JSON registra a duração de cada processo completo, alternando a ordem antes/atual entre consultas. Há uma passagem por caso, sem controle de cache ou repetições estatísticas. Esses tempos ajudam a reproduzir e diagnosticar a execução; não sustentam alegação de aceleração, menor espera do usuário ou latência de uma IA.
+
+## Medições anteriores, com outros cenários
+
+O comando rápido original continua disponível:
 
 ```bash
 python3 tools/benchmark_busca.py
 ```
 
-O script usa somente a biblioteca padrão e o Git local. Obtém `tools/cerebro.py` da revisão pública `40569e851506e3cd027004960f4b7d217bd0cb32` com `git show`, cria um cofre sintético temporário, executa as duas versões e remove o temporário ao terminar. Não faz fetch, inferências ou downloads. Um ZIP ou clone sem a revisão de referência não basta para essa comparação.
+Seu corpus específico de 40 notas relevantes e a consulta `contexto` produziram 11.696 → 5.862 caracteres, redução de 49,9%, com cinco notas e vinte trechos idênticos. O padrão de duas notas produziu 2.495 caracteres. Esse corpus e essa consulta diferem dos oito casos da escala de 40 notas acima.
 
-## Resultado reproduzível
+Uma consulta ao acervo pessoal em 16/10/2026, na versão `663803e09609cc6c47202745564243b05d82f8a4`, produziu 11.961 → 4.677 caracteres, redução de 60,9%, com as mesmas cinco notas e trechos. Seus dados privados não são distribuídos. É uma observação histórica específica, sem extrapolação para a bateria ampliada.
 
-Consulta `contexto`, com 40 notas relevantes sintéticas e um protocolo mínimo. As notas têm quatro linhas relevantes cada, sem variações históricas. Ambas as versões recebem `--trechos --max 5 --orcamento 12000`.
-
-| Medida | Antes | Agora |
-|---|---:|---:|
-| Caracteres da saída inteira | 11.696 | 5.862 |
-| Notas selecionadas | 5 | 5 |
-| Trechos selecionados | 20 | 20 |
-
-**49,9% menos caracteres**, com os mesmos nomes de notas e vinte trechos idênticos, incluindo os números de linha. Pontuações e resumos de orçamento podem mudar. O script falha se essa equivalência deixar de valer, se não houver redução ou se a saída ultrapassar o orçamento.
-
-O padrão atual, medido separadamente, mostra duas notas em **2.495 caracteres**, dentro do limite de 2.500. Essa modalidade seleciona menos notas e não é usada para calcular a redução controlada de 49,9%.
-
-O cenário evidencia o custo de listar individualmente muitas notas omitidas. A versão atual resume essas omissões em uma contagem. A melhoria da precisão da busca é coberta por testes próprios: siglas curtas, aliases de edição, prioridade do estado atual e preservação de resultados históricos.
-
-## Outra observação local
-
-Em uma consulta ao acervo pessoal em 16/10/2026, a comparação com as mesmas cinco notas e trechos passou de **11.961 para 4.677 caracteres: 60,9% menos texto**. Esse acervo não é distribuído; o resultado é uma observação adicional, não o benchmark reproduzível acima. Nenhum conteúdo das notas pessoais acompanha a medição pública.
-
-Essa medição, realizada na versão `663803e09609cc6c47202745564243b05d82f8a4`, é a apresentada no [one pager](../media/one-pager.png) e no [slide editável](../media/one-pager.pptx). A redução é `(11.961 − 4.677) ÷ 11.961 × 100 = 60,9%`, arredondada a uma casa decimal. As duas execuções usaram cinco notas e orçamento de 12.000 caracteres. A equivalência foi conferida nos nomes de notas e trechos, excluindo os nomes das omissões e os resumos de orçamento.
-
-O infográfico substitui a antiga simulação de 30% menos tokens no principal. As projeções hipotéticas de tokens por período, tempo de espera e equivalência de API foram retiradas. O [vídeo da arquitetura](../media/arquitetura.mp4) permanece como explicação ilustrativa do fluxo; ele não é a comprovação do percentual medido.
+O [one pager](../media/one-pager.png) e o [slide editável](../media/one-pager.pptx) agora mostram a análise ampliada. As antigas projeções hipotéticas de tokens por período, espera e equivalência financeira foram retiradas.
 
 ## Limites
 
-- São caracteres Unicode, incluindo quebras de linha. Não há conversão estimada para tokens.
-- Trata-se de uma consulta e um cenário sintético fixo; não é uma média de projetos ou de conversas.
-- A igualdade dos trechos verifica a preservação desse contexto selecionado. Não avalia a qualidade geral das respostas de uma IA.
-- Não foram medidos tokens de entrada/saída/raciocínio, cache, latência, cota preservada ou economia financeira.
-- O one pager atual apresenta caracteres retornados por consulta. A mensalidade não muda: **R$ 0 de desconto**; não há projeção de tempo ou economia financeira.
-
-Para comparar modelos ou níveis de esforço, use tarefas equivalentes com critérios de aceitação e contadores reais do cliente. A redução de texto desta ferramenta não substitui essa avaliação.
+- Os corpora ampliados são inteiramente sintéticos, sem dados pessoais ou de projetos privados.
+- Caracteres Unicode e bytes UTF-8 são unidades distintas. Nenhum valor foi convertido em tokens.
+- O tamanho do corpus consultado não é o volume enviado a um modelo.
+- A equivalência compara a seleção de contexto nestes casos; não avalia inferências ou qualidade geral das IAs.
+- Tokens de entrada/saída/raciocínio, cache de modelos, produtividade e economia financeira não foram medidos. A mensalidade permanece igual.
+- Os percentuais variam conforme cenário e distribuição de notas relevantes. Não há promessa universal de 60%.

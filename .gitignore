@@ -2,13 +2,17 @@
 *
 !.gitignore
 !README.md
+!index.html
+!.nojekyll
 !docs/
 !docs/ARQUITETURA.md
 !docs/BENCHMARK.md
+!docs/benchmark-ampliado.json
 !examples/
 !media/
 !media/arquitetura.mp4
 !media/arquitetura-preview.gif
+!media/arquitetura-capa.jpg
 !media/one-pager.png
 !media/one-pager.pptx
 !tools/
@@ -17,6 +21,7 @@
 !tools/backup_cerebro.py
 !tools/cerebro.py
 !tools/benchmark_busca.py
+!tools/test_benchmark_busca.py
 !tools/test_auxiliares.py
 !tools/test_backup_cerebro.py
 !tools/test_cerebro.py

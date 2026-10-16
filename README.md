@@ -8,29 +8,36 @@ Esta edição pública contém ferramentas, um cofre sintético de exemplo, docu
 
 Vídeo animado, com a voz do Noah, que explica passo a passo a ideia: o principal consulta o Cérebro, delega pelo roteador e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
 
-[![Prévia animada do vídeo da arquitetura — clique para assistir ao vídeo completo](media/arquitetura-preview.gif)](media/arquitetura.mp4)
+[![Capa estática do vídeo da arquitetura — clique para abrir o player](media/arquitetura-capa.jpg)](https://nicholasbirochi.github.io/Cerebro/)
 
-**[Abrir o vídeo (MP4, 3min18s)](media/arquitetura.mp4)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
+**[▶ Abrir o player (3min18s)](https://nicholasbirochi.github.io/Cerebro/)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
 
-A prévia acima é um trecho do vídeo original; o MP4 completo, com narração, foi mantido.
+O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. A capa acima é estática; o MP4 original, com narração, foi mantido.
 
-## Benchmark: 60,9% menos texto na busca
+## Benchmark ampliado: 10.000 notas e 26,9 milhões de caracteres
 
-[![Benchmark local: 11.961 para 4.677 caracteres, redução de 60,9%, com as mesmas cinco notas e trechos](media/one-pager.png)](media/one-pager.png)
+[![Benchmark ampliado: três escalas, 24 consultas pareadas e 43,9% menos texto retornado no agregado](media/one-pager.png)](media/one-pager.png)
 
 [Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
 
-O one pager mostra a **medição local de 16/10/2026**: a mesma consulta, no mesmo estado do acervo e com as mesmas cinco notas e trechos, passou de **11.961 para 4.677 caracteres — 60,9% menos texto retornado**. A lista de notas omitidas foi resumida em uma contagem. Esse resultado mede a saída da busca; não é uma medição dos tokens totais ou do custo de uma IA. **A mensalidade permanece igual: R$ 0 de desconto.**
+Análise com dados **inteiramente sintéticos**, em três escalas: 40, 1.000 e 10.000 notas de conteúdo. O maior acervo tem **26.918.974 caracteres**, mais de 28 MB em UTF-8, incluindo um protocolo mínimo. São oito consultas distintas por escala, cobrindo temas, múltiplos termos, filtro de projeto e ausência de resultado: **24 comparações e 48 execuções**.
 
-### Reproduzir com dados sintéticos
+| Escala | Texto retornado antes | Agora | Redução |
+|---|---:|---:|---:|
+| 40 notas, 8 consultas | 44.547 | 37.155 | 16,6% |
+| 1.000 notas, 8 consultas | 82.546 | 40.565 | 50,9% |
+| 10.000 notas, 8 consultas | 83.872 | 40.579 | 51,6% |
+| **Total de 24 consultas** | **210.965** | **118.299** | **43,9%** |
 
-Em um cofre sintético de 40 notas relevantes, a saída passou de **11.696 para 5.862 caracteres: 49,9% menos texto**, preservando as mesmas cinco notas e vinte trechos. A comparação usa o mesmo limite de notas e orçamento nas duas versões. Mede a saída da ferramenta; não comprova redução equivalente de tokens totais, custo ou tempo de uma IA.
+**Mesmas notas e trechos em todas as comparações**, com o mesmo limite de cinco notas e 12.000 caracteres por consulta. Os totais acima somam saídas de consultas distintas. O tamanho do acervo é contado separadamente e não representa conteúdo inteiro enviado à IA.
+
+### Reproduzir a análise
 
 ```bash
-python3 tools/benchmark_busca.py
+python3 tools/benchmark_busca.py --ampliado
 ```
 
-[Método, revisões de referência e limites](docs/BENCHMARK.md). Os 49,9% do cenário sintético e os 60,9% da medição local são resultados de consultas distintas. O acervo pessoal não é distribuído.
+[Método e limites](docs/BENCHMARK.md) · [Resultados completos, consultas, hashes e tempos observados](docs/benchmark-ampliado.json). O comando sem `--ampliado` mantém o exemplo rápido original de 40 notas. A medição local anterior de 60,9% pertence a uma consulta específica e não é extrapolada para esta bateria. Caracteres de saída não medem tokens totais, produtividade ou economia financeira. O acervo pessoal não é distribuído.
 
 ## Arquitetura de delegação
 
