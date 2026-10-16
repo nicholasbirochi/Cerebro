@@ -32,12 +32,16 @@ O cenário evidencia o custo de listar individualmente muitas notas omitidas. A 
 
 Em uma consulta ao acervo pessoal em 16/10/2026, a comparação com as mesmas cinco notas e trechos passou de **11.961 para 4.677 caracteres: 60,9% menos texto**. Esse acervo não é distribuído; o resultado é uma observação adicional, não o benchmark reproduzível acima. Nenhum conteúdo das notas pessoais acompanha a medição pública.
 
+Essa medição, realizada na versão `663803e09609cc6c47202745564243b05d82f8a4`, é a apresentada no [one pager](../media/one-pager.png) e no [slide editável](../media/one-pager.pptx). A redução é `(11.961 − 4.677) ÷ 11.961 × 100 = 60,9%`, arredondada a uma casa decimal. As duas execuções usaram cinco notas e orçamento de 12.000 caracteres. A equivalência foi conferida nos nomes de notas e trechos, excluindo os nomes das omissões e os resumos de orçamento.
+
+O infográfico substitui a antiga simulação de 30% menos tokens no principal. As projeções hipotéticas de tokens por período, tempo de espera e equivalência de API foram retiradas. O [vídeo da arquitetura](../media/arquitetura.mp4) permanece como explicação ilustrativa do fluxo; ele não é a comprovação do percentual medido.
+
 ## Limites
 
 - São caracteres Unicode, incluindo quebras de linha. Não há conversão estimada para tokens.
 - Trata-se de uma consulta e um cenário sintético fixo; não é uma média de projetos ou de conversas.
 - A igualdade dos trechos verifica a preservação desse contexto selecionado. Não avalia a qualidade geral das respostas de uma IA.
 - Não foram medidos tokens de entrada/saída/raciocínio, cache, latência, cota preservada ou economia financeira.
-- Os **30% menos tokens** apresentados no one pager continuam sendo uma **simulação distinta**. A mensalidade não muda: **R$ 0 de desconto**.
+- O one pager atual apresenta caracteres retornados por consulta. A mensalidade não muda: **R$ 0 de desconto**; não há projeção de tempo ou economia financeira.
 
 Para comparar modelos ou níveis de esforço, use tarefas equivalentes com critérios de aceitação e contadores reais do cliente. A redução de texto desta ferramenta não substitui essa avaliação.

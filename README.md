@@ -4,19 +4,25 @@ Sistema local de conhecimento compartilhado entre agentes de programação. Regr
 
 Esta edição pública contém ferramentas, um cofre sintético de exemplo, documentação e o vídeo da arquitetura. O cofre pessoal, os backups reais, credenciais, configurações de contas e referências de voz ficam fora do repositório.
 
-## Apresentação
+## Vídeo da arquitetura
 
-Vídeo animado da arquitetura, com a voz do Noah, e um resumo visual de como a delegação pode preservar a cota do Claude ou Codex.
+Vídeo animado, com a voz do Noah, que explica passo a passo a ideia: o principal consulta o Cérebro, delega pelo roteador e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
+
+[![Prévia animada do vídeo da arquitetura — clique para assistir ao vídeo completo](media/arquitetura-preview.gif)](media/arquitetura.mp4)
 
 **[Abrir o vídeo (MP4, 3min18s)](media/arquitetura.mp4)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
 
-[![One pager: comparação Antes e Agora, exemplos de delegação e equivalências de API e assinatura](media/one-pager.png)](media/one-pager.png)
+A prévia acima é um trecho do vídeo original; o MP4 completo, com narração, foi mantido.
+
+## Benchmark: 60,9% menos texto na busca
+
+[![Benchmark local: 11.961 para 4.677 caracteres, redução de 60,9%, com as mesmas cinco notas e trechos](media/one-pager.png)](media/one-pager.png)
 
 [Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
 
-O one pager apresenta uma **simulação**, com 30% menos tokens no principal. **A mensalidade permanece igual: R$ 0 de desconto.** Os valores de API são equivalências hipotéticas de processamento. Menos espera e mais entregas são benefícios potenciais, ainda não medidos.
+O one pager mostra a **medição local de 16/10/2026**: a mesma consulta, no mesmo estado do acervo e com as mesmas cinco notas e trechos, passou de **11.961 para 4.677 caracteres — 60,9% menos texto retornado**. A lista de notas omitidas foi resumida em uma contagem. Esse resultado mede a saída da busca; não é uma medição dos tokens totais ou do custo de uma IA. **A mensalidade permanece igual: R$ 0 de desconto.**
 
-### Medição reproduzível da busca
+### Reproduzir com dados sintéticos
 
 Em um cofre sintético de 40 notas relevantes, a saída passou de **11.696 para 5.862 caracteres: 49,9% menos texto**, preservando as mesmas cinco notas e vinte trechos. A comparação usa o mesmo limite de notas e orçamento nas duas versões. Mede a saída da ferramenta; não comprova redução equivalente de tokens totais, custo ou tempo de uma IA.
 
@@ -24,7 +30,7 @@ Em um cofre sintético de 40 notas relevantes, a saída passou de **11.696 para 
 python3 tools/benchmark_busca.py
 ```
 
-[Método, revisão de referência e limites](docs/BENCHMARK.md). Uma observação separada no acervo local registrou 60,9% menos caracteres; seus dados privados não são distribuídos. Os 30% do one pager permanecem uma simulação de delegação, distinta dessas medições de busca.
+[Método, revisões de referência e limites](docs/BENCHMARK.md). Os 49,9% do cenário sintético e os 60,9% da medição local são resultados de consultas distintas. O acervo pessoal não é distribuído.
 
 ## Arquitetura de delegação
 
