@@ -16,6 +16,16 @@ Vídeo animado da arquitetura, com a voz do Noah, e um resumo visual de como a d
 
 O one pager apresenta uma **simulação**, com 30% menos tokens no principal. **A mensalidade permanece igual: R$ 0 de desconto.** Os valores de API são equivalências hipotéticas de processamento. Menos espera e mais entregas são benefícios potenciais, ainda não medidos.
 
+### Medição reproduzível da busca
+
+Em um cofre sintético de 40 notas relevantes, a saída passou de **11.696 para 5.862 caracteres: 49,9% menos texto**, preservando as mesmas cinco notas e vinte trechos. A comparação usa o mesmo limite de notas e orçamento nas duas versões. Mede a saída da ferramenta; não comprova redução equivalente de tokens totais, custo ou tempo de uma IA.
+
+```bash
+python3 tools/benchmark_busca.py
+```
+
+[Método, revisão de referência e limites](docs/BENCHMARK.md). Uma observação separada no acervo local registrou 60,9% menos caracteres; seus dados privados não são distribuídos. Os 30% do one pager permanecem uma simulação de delegação, distinta dessas medições de busca.
+
 ## Arquitetura de delegação
 
 ```mermaid
@@ -64,6 +74,8 @@ python3 tools/cerebro.py buscar regras --trechos --max 5 --orcamento 12000
 ```
 
 O modo sem `--trechos` preserva o padrão anterior de cinco notas e 12.000 caracteres de conteúdo selecionado. Os limites são de caracteres, não uma medição de tokens ou economia de assinatura. [Rotas por tarefa e monitoramento dos mapas](docs/ARQUITETURA.md#mapas-e-contexto-em-camadas) completam a navegação sem carregar o histórico inteiro.
+
+A busca ignora acentos e caixa, trata termos de até três caracteres como palavras inteiras e reconhece os aliases explícitos `edita`/`editar`/`modifica`/`modificar`. Termos maiores mantêm a busca parcial. Seções de estado atual recebem preferência; o histórico continua pesquisável. Isso melhora a seleção local e não altera a fase declarada de um projeto.
 
 ## Auxiliares
 

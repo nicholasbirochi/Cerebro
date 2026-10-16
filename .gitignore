@@ -4,6 +4,7 @@
 !README.md
 !docs/
 !docs/ARQUITETURA.md
+!docs/BENCHMARK.md
 !examples/
 !media/
 !media/arquitetura.mp4
@@ -14,6 +15,7 @@
 !tools/auxiliares.py
 !tools/backup_cerebro.py
 !tools/cerebro.py
+!tools/benchmark_busca.py
 !tools/test_auxiliares.py
 !tools/test_backup_cerebro.py
 !tools/test_cerebro.py

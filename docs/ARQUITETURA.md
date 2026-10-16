@@ -22,6 +22,8 @@ Codenotch é uma camada separada de monitoramento, retirada do mapa de encaminha
 
 Uma consulta começa por projeto e trechos: até duas notas e 2.500 caracteres por padrão. Primeiro use o estado atual e a rota pertinente; consulte o histórico e amplie `--max`/`--orcamento` apenas se faltar informação. As omissões são contadas, sem listar dezenas de notas. O resumo continua informando a quantidade exibida e os caracteres da saída inteira.
 
+O mesmo matching orienta a seleção de notas e de trechos: termos de até três caracteres exigem palavra inteira, os aliases de edição são explícitos e termos maiores continuam aceitando correspondência parcial. A pontuação dá peso maior a seções `Estado atual`, `Resumo atual`, `Situação atual` e `Status atual`, e menor a `Histórico`; subseções herdam o peso até um cabeçalho do mesmo nível ou superior. Trechos atuais aparecem primeiro, seguidos pela quantidade de termos distintos. O histórico permanece disponível quando relevante. O [benchmark sintético](BENCHMARK.md) mede separadamente a quantidade de texto retornado.
+
 Uma seção curta no mapa pode indicar tarefa, arquivo e validação. Exemplo com as próprias ferramentas públicas:
 
 | Tarefa | Consultar | Validação |
@@ -33,3 +35,11 @@ Uma seção curta no mapa pode indicar tarefa, arquivo e validação. Exemplo co
 O verificador já aceita `conferido_em`, `fontes_raiz` (caminho absoluto local) e `fontes_conferidas` (lista de caminhos relativos seguidos de `sha256:` e 64 caracteres hexadecimais). Registre apenas fontes pertinentes que você tenha conferido e mantenha esses caminhos no seu cofre privado. Uma mudança de hash pede nova conferência daquela fonte; não prova que o projeto esteja quebrado. A data do monitoramento não atualiza automaticamente a versão histórica do diagrama.
 
 Hashes de referência podem ser obtidos com `python3 -c 'import hashlib,pathlib; print(hashlib.sha256(pathlib.Path("caminho/arquivo.py").read_bytes()).hexdigest())'`. Não use arquivos de dados, credenciais ou conteúdo somente na nuvem como fontes automáticas. A distribuição não inclui mapas ou caminhos do cofre pessoal.
+
+## Skills e esforço por tarefa
+
+Uma skill de mapas pode ter uma entrada curta que encaminha consultas ao grafo existente, atualizações incrementais e construções novas para referências diferentes. Carregue só o procedimento necessário. Uma edição pequena em arquivo conhecido pode usar busca normal; a presença de um grafo não exige reconstruí-lo nem carregar todo o manual.
+
+`medium` é um ponto de partida para tarefas delimitadas. Use esforço menor em tarefas simples e revisadas, e maior quando diagnóstico, riscos ou verificações exigirem. Preserve o modelo escolhido pelo usuário e valide o resultado com os critérios da tarefa; não há seleção automática de esforço neste repositório.
+
+No Codex, o padrão é configurado por `model_reasoning_effort` em `config.toml`. No Claude Code, `effortLevel` define o padrão onde aplicável; escolhas por modelo ou sessão podem prevalecer. Configurações locais e contas não são distribuídas. Confira o esforço ativo no cliente ao iniciar uma sessão e ajuste quando necessário. Fontes: [configuração do Codex](https://learn.chatgpt.com/docs/config-file/config-reference) e [esforço no Claude Code](https://code.claude.com/docs/en/model-config#effort-level).

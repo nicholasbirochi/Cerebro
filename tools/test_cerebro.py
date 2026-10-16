@@ -403,6 +403,53 @@ class CofreSintetico(unittest.TestCase):
                     junta = self.rodar("buscar", *consulta, *modo)
                     self.assertEqual(junta.stdout, separadas.stdout, consulta)
 
+    def test_buscar_termos_curtos_sem_substrings(self):
+        pasta = self.base / "05 - Padrões e Preferências/Aprendizados"
+        (pasta / "Aprendizado - interface.md").write_text(
+            nota(corpo="## Interface\n- UI: painel de teste.\n- arquivo do build.\n"), encoding="utf-8")
+        (pasta / "Aprendizado - ruído.md").write_text(
+            nota(corpo="arquivo e build\n"), encoding="utf-8")
+        for modo in ((), ("--trechos",)):
+            r = self.rodar("buscar", "ui", *modo)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertIn("Aprendizado - interface.md", r.stdout)
+            self.assertNotIn("Aprendizado - ruído.md", r.stdout)
+            self.assertNotIn("arquivo do build", r.stdout)
+        self.assertIn("[Interface] - UI:", self.rodar("buscar", "UI", "--trechos").stdout)
+
+    def test_buscar_aliases_explicitos_com_mesmo_matching_nos_trechos(self):
+        pasta = self.base / "05 - Padrões e Preferências/Aprendizados"
+        (pasta / "Aprendizado - rota.md").write_text(
+            nota(corpo="## Rota\n- editar o painel em app.py\n"), encoding="utf-8")
+        for termo in ("modifica", "modificar", "edita", "editar"):
+            for modo in ((), ("--trechos",)):
+                r = self.rodar("buscar", termo, *modo)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertIn("Aprendizado - rota.md", r.stdout)
+                if modo:
+                    self.assertIn("[Rota] - editar o painel", r.stdout)
+        self.assertEqual(self.rodar("buscar", "modifica", "--trechos").stdout,
+                         self.rodar("buscar", "modifica", "editar", "--trechos").stdout)
+
+    def test_buscar_estado_atual_prioritario_sem_perder_historico(self):
+        pasta = self.base / "05 - Padrões e Preferências/Aprendizados"
+        for nome, secao in (("A", "Histórico"), ("B", "Estado atual")):
+            (pasta / f"Aprendizado - {nome}.md").write_text(
+                nota(corpo=f"## {secao}\n### Rota\n- painel em app.py\n"), encoding="utf-8")
+        r = self.rodar("buscar", "painel", "--trechos", "--max", "2")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertLess(r.stdout.index("Aprendizado - B.md"), r.stdout.index("Aprendizado - A.md"))
+        corpo = ("## Histórico\n- painel antigo build deploy rota\n"
+                 "## Estado atual\n### Rota\n- painel em app.py\n")
+        linhas, _ = cerebro.trechos(corpo, corpo, ["painel", "build", "deploy", "rota"], maximo=1)
+        self.assertIn("painel em app.py", linhas[0])
+        historico, _ = cerebro.trechos(corpo, corpo, ["antigo"], maximo=1)
+        self.assertIn("painel antigo", historico[0])
+        (pasta / "Aprendizado - C.md").write_text(nota(corpo=corpo), encoding="utf-8")
+        so_historico = self.rodar("buscar", "antigo", "--trechos")
+        self.assertEqual(so_historico.returncode, 0, so_historico.stderr)
+        self.assertIn("painel antigo", so_historico.stdout)
+
     def test_verificar_avisa_fontes_alteradas_sem_erro(self):
         fonte = self.projeto / "src" / "app.py"
         fonte.parent.mkdir()
