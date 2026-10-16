@@ -1,12 +1,12 @@
 # Cérebro
 
-Sistema local de conhecimento compartilhado entre agentes de programação. Regras, contexto de projetos, decisões e aprendizados ficam em arquivos Markdown; as ferramentas consultam trechos relevantes e registram conhecimento verificável.
+O Cérebro reúne regras, contexto de projetos, decisões e aprendizados em arquivos Markdown locais. Agentes de programação consultam os trechos relevantes antes de trabalhar e registram o que foi verificado, para que a próxima sessão possa retomar de onde a anterior parou.
 
 Esta edição pública contém ferramentas, um cofre sintético de exemplo, documentação e o vídeo da arquitetura. O cofre pessoal, os backups reais, credenciais, configurações de contas e referências de voz ficam fora do repositório.
 
 ## Vídeo da arquitetura
 
-Vídeo animado, com a voz do Noah, que explica passo a passo a ideia: o principal consulta o Cérebro, delega pelo roteador e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
+O vídeo usa a voz do Noah para mostrar o fluxo: o agente principal consulta o Cérebro, delega pelo roteador e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
 
 [![Capa estática do vídeo da arquitetura — clique para abrir o player](media/arquitetura-capa.jpg)](https://nicholasbirochi.github.io/Cerebro/)
 
@@ -111,3 +111,7 @@ Uma pasta sincronizada no mesmo disco não representa independência física. Pa
 ## Privacidade
 
 Use o repositório como distribuição de ferramentas, mantendo o cofre pessoal separado. A lista de arquivos permitidos no `.gitignore` ajuda a impedir o envio acidental de notas, arquivos compactados, bases de dados ou amostras de voz. Uma revisão do conteúdo continua necessária antes de cada publicação.
+
+## Licença
+
+O código e a documentação originais deste projeto estão disponíveis sob a [licença MIT](LICENSE). Referências a serviços, ferramentas e modelos de terceiros seguem as condições dos respectivos fornecedores.

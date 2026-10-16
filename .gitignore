@@ -2,6 +2,7 @@
 *
 !.gitignore
 !README.md
+!LICENSE
 !index.html
 !.nojekyll
 !docs/
