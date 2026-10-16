@@ -446,10 +446,8 @@ def _custo(linhas) -> int:
 
 
 def _mostrar_trechos(resultados, termos, args) -> int:
-    """O orçamento vale para a saída inteira: blocos, linhas OMITIDA e resumo final. Prioridade:
-    blocos (em ordem de relevância), resumo, omissões listadas (um prefixo da ordem de relevância; as
-    demais viram uma linha de contagem) e, se sobrar espaço, a orientação de leitura. Se nem o resumo
-    obrigatório couber, nada é impresso e a busca falha informando o mínimo."""
+    """O orçamento inclui blocos, uma contagem de omissões e o resumo final.
+    Se nem o resumo obrigatório couber, falha sem imprimir saída parcial."""
     candidatos = [r for r in resultados if r[0] > 0 or not termos]
 
     def resumo(mostradas, total, fim=".", maximo=None):
@@ -497,14 +495,8 @@ def _mostrar_trechos(resultados, termos, args) -> int:
             continue
         blocos += bloco
         mostradas += 1
-    saida = None
-    for k in range(len(omitidas), -1, -1):  # o maior prefixo de omissões listadas que cabe
-        tentativa = fechar(blocos + [l for l, _ in omitidas[:k]] + ([resto(omitidas[k:])] if k < len(omitidas) else []),
-                           mostradas)
-        if _custo(tentativa) <= args.orcamento:
-            saida = tentativa
-            break
-    if saida is None:
+    saida = fechar(blocos + ([resto(omitidas)] if omitidas else []), mostradas)
+    if _custo(saida) > args.orcamento:
         minimo = args.orcamento  # o resumo cita o máximo; o mínimo é o ponto fixo dessa conta
         for _ in range(5):
             minimo, anterior = _custo(fechar([resto(omitidas)] if omitidas else [], 0, maximo=minimo)), minimo
@@ -523,6 +515,10 @@ def _mostrar_trechos(resultados, termos, args) -> int:
 
 def cmd_buscar(args) -> int:
     base = cofre()
+    if args.max is None:
+        args.max = 2 if args.trechos else 5
+    if args.orcamento is None:
+        args.orcamento = 2500 if args.trechos else ORCAMENTO
     if args.max < 1 or args.orcamento < 1:
         raise Erro("--max e --orcamento precisam ser positivos")
     # "backup saúde" num argumento equivale a backup e saúde separados: cada palavra é um termo
@@ -894,9 +890,9 @@ def main(argv=None) -> int:
     b = sub.add_parser("buscar", help="notas relacionadas a termos")
     b.add_argument("termos", nargs="*")
     b.add_argument("--projeto")
-    b.add_argument("--max", type=int, default=5, help="máximo de notas (padrão 5)")
-    b.add_argument("--orcamento", type=int, default=ORCAMENTO,
-                   help=f"caracteres das notas selecionadas; com --trechos, da saída inteira (padrão {ORCAMENTO})")
+    b.add_argument("--max", type=int, help="máximo de notas (padrão 2 com --trechos; 5 sem)")
+    b.add_argument("--orcamento", type=int,
+                   help=f"caracteres: saída inteira com --trechos (padrão 2500); notas selecionadas sem (padrão {ORCAMENTO})")
     b.add_argument("--incluir-logs", action="store_true")
     b.add_argument("--todos", action="store_true", help="inclui arquivadas/obsoletas")
     b.add_argument("--trechos", action="store_true",

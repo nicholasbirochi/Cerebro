@@ -358,6 +358,21 @@ class CofreSintetico(unittest.TestCase):
                          [int(l.split()[1]) for l in listadas]
                 self.assertEqual(pontos, sorted(pontos, reverse=True))
 
+    def test_buscar_trechos_progressivo_sem_listagem_de_omissoes(self):
+        self.notas_de_backup()
+        for opcoes, limite, quantidade in (((), 2500, 2),
+                                           (("--max", "5", "--orcamento", "12000"), 12000, 5)):
+            with self.subTest(opcoes=opcoes):
+                r = self.rodar("buscar", "backup", "--trechos", *opcoes)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertLessEqual(len(r.stdout), limite)
+                resumo = r.stdout.splitlines()[-1]
+                self.assertIn(f"trechos de {quantidade} nota(s)", resumo)
+                omitidas = [l for l in r.stdout.splitlines() if l.startswith("OMITIDA")]
+                self.assertEqual(len(omitidas), 1)
+                self.assertTrue(omitidas[0].startswith(f"OMITIDA +{34 - quantidade} "))
+                self.assertNotIn(".md", omitidas[0])
+
     def test_buscar_trechos_orcamento_pequeno_demais(self):
         self.notas_de_backup()
         r = self.rodar("buscar", "backup", "--trechos", "--orcamento", "50")
