@@ -1,0 +1,473 @@
+{
+  "cenario": "Três escalas sintéticas determinísticas, oito consultas por escala",
+  "referencia_git": "40569e851506e3cd027004960f4b7d217bd0cb32",
+  "nucleo_atual_sha256": "16e96249ffb18fe507ac5845b066969cc4b414fa953e867fb8c07f9074255d04",
+  "script_sha256": "c6e73def26dc71e3a6eee6993d6d3d2e182f08390da59e962a41f7ed95bc47af",
+  "ambiente": {
+    "python": "3.14.7",
+    "plataforma": "darwin"
+  },
+  "opcoes_por_consulta": {
+    "max_notas": 5,
+    "orcamento_caracteres": 12000
+  },
+  "escalas": [
+    {
+      "corpus": {
+        "notas_de_conteudo": 40,
+        "arquivos_markdown": 41,
+        "caracteres": 105046,
+        "bytes_utf8": 110089,
+        "sha256": "9ad29a4e3e4ef9dae07852466ccebc0658542579659b5df8d6b7a76f2507022b"
+      },
+      "consultas": [
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "notas_elegiveis": 10,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 6480,
+          "depois": 5770,
+          "reducao_percentual": 11.0,
+          "segundos_observados": {
+            "antes": 0.0629,
+            "depois": 0.0587
+          }
+        },
+        {
+          "termos": [
+            "validacao"
+          ],
+          "notas_elegiveis": 10,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 6470,
+          "depois": 5765,
+          "reducao_percentual": 10.9,
+          "segundos_observados": {
+            "depois": 0.0558,
+            "antes": 0.0579
+          }
+        },
+        {
+          "termos": [
+            "interface"
+          ],
+          "notas_elegiveis": 10,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 6470,
+          "depois": 5765,
+          "reducao_percentual": 10.9,
+          "segundos_observados": {
+            "antes": 0.0603,
+            "depois": 0.0669
+          }
+        },
+        {
+          "termos": [
+            "publicacao"
+          ],
+          "notas_elegiveis": 10,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 6480,
+          "depois": 5770,
+          "reducao_percentual": 11.0,
+          "segundos_observados": {
+            "depois": 0.0696,
+            "antes": 0.0715
+          }
+        },
+        {
+          "termos": [
+            "roteamento",
+            "validacao"
+          ],
+          "notas_elegiveis": 20,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 8050,
+          "depois": 5769,
+          "reducao_percentual": 28.3,
+          "segundos_observados": {
+            "antes": 0.0685,
+            "depois": 0.0739
+          }
+        },
+        {
+          "termos": [
+            "interface",
+            "publicacao"
+          ],
+          "notas_elegiveis": 20,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 8050,
+          "depois": 5769,
+          "reducao_percentual": 28.3,
+          "segundos_observados": {
+            "depois": 0.0737,
+            "antes": 0.0813
+          }
+        },
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "projeto": "Demo-00",
+          "notas_elegiveis": 2,
+          "notas_selecionadas": 2,
+          "trechos": 8,
+          "mesmas_notas_e_trechos": true,
+          "antes": 2378,
+          "depois": 2378,
+          "reducao_percentual": 0.0,
+          "segundos_observados": {
+            "antes": 0.0812,
+            "depois": 0.0865
+          }
+        },
+        {
+          "termos": [
+            "inexistentezzz"
+          ],
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
+          "mesmas_notas_e_trechos": true,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "segundos_observados": {
+            "depois": 0.0995,
+            "antes": 0.0894
+          }
+        }
+      ],
+      "agregado": {
+        "antes": 44547,
+        "depois": 37155,
+        "reducao_percentual": 16.6
+      }
+    },
+    {
+      "corpus": {
+        "notas_de_conteudo": 1000,
+        "arquivos_markdown": 1001,
+        "caracteres": 2690974,
+        "bytes_utf8": 2819929,
+        "sha256": "d9a3d7b5e4193d72eb69db68908a7d0a0b71be372e8edb59c8c5d068f1802b8d"
+      },
+      "consultas": [
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "notas_elegiveis": 250,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11937,
+          "depois": 5774,
+          "reducao_percentual": 51.6,
+          "segundos_observados": {
+            "antes": 0.4932,
+            "depois": 0.4785
+          }
+        },
+        {
+          "termos": [
+            "validacao"
+          ],
+          "notas_elegiveis": 250,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11970,
+          "depois": 5769,
+          "reducao_percentual": 51.8,
+          "segundos_observados": {
+            "depois": 0.3751,
+            "antes": 0.302
+          }
+        },
+        {
+          "termos": [
+            "interface"
+          ],
+          "notas_elegiveis": 250,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11970,
+          "depois": 5769,
+          "reducao_percentual": 51.8,
+          "segundos_observados": {
+            "antes": 0.3475,
+            "depois": 0.3856
+          }
+        },
+        {
+          "termos": [
+            "publicacao"
+          ],
+          "notas_elegiveis": 250,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11937,
+          "depois": 5774,
+          "reducao_percentual": 51.6,
+          "segundos_observados": {
+            "depois": 0.5559,
+            "antes": 0.493
+          }
+        },
+        {
+          "termos": [
+            "roteamento",
+            "validacao"
+          ],
+          "notas_elegiveis": 500,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11987,
+          "depois": 5769,
+          "reducao_percentual": 51.9,
+          "segundos_observados": {
+            "antes": 0.3928,
+            "depois": 0.3881
+          }
+        },
+        {
+          "termos": [
+            "interface",
+            "publicacao"
+          ],
+          "notas_elegiveis": 500,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11987,
+          "depois": 5769,
+          "reducao_percentual": 51.9,
+          "segundos_observados": {
+            "depois": 0.3328,
+            "antes": 0.4935
+          }
+        },
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "projeto": "Demo-00",
+          "notas_elegiveis": 36,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 10589,
+          "depois": 5772,
+          "reducao_percentual": 45.5,
+          "segundos_observados": {
+            "antes": 0.3542,
+            "depois": 0.1761
+          }
+        },
+        {
+          "termos": [
+            "inexistentezzz"
+          ],
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
+          "mesmas_notas_e_trechos": true,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "segundos_observados": {
+            "depois": 0.2852,
+            "antes": 0.2179
+          }
+        }
+      ],
+      "agregado": {
+        "antes": 82546,
+        "depois": 40565,
+        "reducao_percentual": 50.9
+      }
+    },
+    {
+      "corpus": {
+        "notas_de_conteudo": 10000,
+        "arquivos_markdown": 10001,
+        "caracteres": 26918974,
+        "bytes_utf8": 28208929,
+        "sha256": "676678e62c3ae9b2d9d2cdf4c604551d20af1af034c2d0e1c54ba49a2a57d7da"
+      },
+      "consultas": [
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "notas_elegiveis": 2500,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11939,
+          "depois": 5776,
+          "reducao_percentual": 51.6,
+          "segundos_observados": {
+            "antes": 3.3326,
+            "depois": 2.4433
+          }
+        },
+        {
+          "termos": [
+            "validacao"
+          ],
+          "notas_elegiveis": 2500,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11972,
+          "depois": 5771,
+          "reducao_percentual": 51.8,
+          "segundos_observados": {
+            "depois": 2.1095,
+            "antes": 2.1312
+          }
+        },
+        {
+          "termos": [
+            "interface"
+          ],
+          "notas_elegiveis": 2500,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11972,
+          "depois": 5771,
+          "reducao_percentual": 51.8,
+          "segundos_observados": {
+            "antes": 2.909,
+            "depois": 1.868
+          }
+        },
+        {
+          "termos": [
+            "publicacao"
+          ],
+          "notas_elegiveis": 2500,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11939,
+          "depois": 5776,
+          "reducao_percentual": 51.6,
+          "segundos_observados": {
+            "depois": 1.7694,
+            "antes": 2.1152
+          }
+        },
+        {
+          "termos": [
+            "roteamento",
+            "validacao"
+          ],
+          "notas_elegiveis": 5000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11972,
+          "depois": 5771,
+          "reducao_percentual": 51.8,
+          "segundos_observados": {
+            "antes": 3.7935,
+            "depois": 1.9195
+          }
+        },
+        {
+          "termos": [
+            "interface",
+            "publicacao"
+          ],
+          "notas_elegiveis": 5000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11972,
+          "depois": 5771,
+          "reducao_percentual": 51.8,
+          "segundos_observados": {
+            "depois": 2.2384,
+            "antes": 3.829
+          }
+        },
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "projeto": "Demo-00",
+          "notas_elegiveis": 358,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11937,
+          "depois": 5774,
+          "reducao_percentual": 51.6,
+          "segundos_observados": {
+            "antes": 0.7547,
+            "depois": 0.8064
+          }
+        },
+        {
+          "termos": [
+            "inexistentezzz"
+          ],
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
+          "mesmas_notas_e_trechos": true,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "segundos_observados": {
+            "depois": 1.864,
+            "antes": 1.7843
+          }
+        }
+      ],
+      "agregado": {
+        "antes": 83872,
+        "depois": 40579,
+        "reducao_percentual": 51.6
+      }
+    }
+  ],
+  "total": {
+    "consultas_pareadas": 24,
+    "execucoes": 48,
+    "antes": 210965,
+    "depois": 118299,
+    "caracteres_a_menos": 92666,
+    "reducao_percentual": 43.9,
+    "mesmas_notas_e_trechos_em_todas": true
+  },
+  "limites": [
+    "Corpora inteiramente sintéticos; os prefixos se repetem entre escalas.",
+    "O tamanho do maior corpus é contado uma vez, sem multiplicar pelas consultas.",
+    "As saídas incluem omissões, resumo e quebras de linha; não são tokens de IA.",
+    "Tempos são uma passagem por caso, sem controle de cache nem repetições estatísticas.",
+    "Não mede inferências, produtividade, qualidade geral das IAs ou economia financeira."
+  ]
+}

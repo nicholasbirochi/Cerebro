@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Vídeo ilustrativo da arquitetura do Cérebro, com reprodução manual e controles de tempo.">
+  <title>Cérebro — vídeo da arquitetura</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101923; color: #f5f6f0; }
+    body { max-width: 1120px; margin: auto; padding: 24px; }
+    h1 { margin-bottom: 12px; font-size: clamp(1.7rem, 4vw, 2.8rem); }
+    p { color: #aab8c5; line-height: 1.6; }
+    video { display: block; width: 100%; height: auto; max-height: 70vh; object-fit: contain; margin: 24px 0; background: #050d14; border-radius: 8px; }
+    a { color: #70dec9; }
+    a:focus-visible { outline: 3px solid #92bfff; outline-offset: 4px; }
+    nav { display: flex; flex-wrap: wrap; gap: 24px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Vídeo da arquitetura do Cérebro</h1>
+    <p>Clique em Play para começar. Use a barra de tempo para avançar ou voltar; os controles também permitem pausar, ajustar o volume e abrir em tela cheia.</p>
+    <video controls playsinline preload="metadata" poster="media/arquitetura-capa.jpg" width="1920" height="1080" aria-label="Vídeo narrado da arquitetura do Cérebro, com legendas no próprio vídeo">
+      <source src="media/arquitetura.mp4" type="video/mp4">
+      Seu navegador não conseguiu abrir o vídeo. <a href="media/arquitetura.mp4">Abra o MP4 diretamente</a>.
+    </video>
+    <nav aria-label="Links do projeto">
+      <a href="https://github.com/nicholasbirochi/Cerebro">Voltar ao repositório</a>
+      <a href="media/arquitetura.mp4" download>Baixar o vídeo completo</a>
+    </nav>
+    <p>Ilustração do fluxo: o principal consulta o Cérebro, delega pelo roteador e revisa o resultado. As animações explicam a ideia; não são telemetria de mensagens reais.</p>
+  </main>
+</body>
+</html>
