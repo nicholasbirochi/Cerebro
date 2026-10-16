@@ -411,21 +411,52 @@ def _secoes(corpo: str, limite: int = 8) -> list:
             for i, (inicio, titulo) in enumerate(marcas)][:limite]
 
 
+def padroes_busca(termos: list) -> list:
+    """Aliases limitados; termos curtos não correspondem dentro de outras palavras."""
+    edicao = ("edita", "editar", "modifica", "modificar")
+    padroes = []
+    for termo in termos:
+        variantes = edicao if termo in edicao else (termo,)
+        padrao = "(?:" + "|".join(re.escape(v) for v in variantes) + ")"
+        if len(termo) <= 3 or termo in edicao:
+            padrao = r"(?<!\w)" + padrao + r"(?!\w)"
+        if padrao not in padroes:
+            padroes.append(padrao)
+    return [re.compile(p) for p in padroes]
+
+
+def linhas_busca(corpo: str):
+    """Peso herdado pela hierarquia: atual=3, comum=2, histórico=1."""
+    secoes = []
+    for i, linha in enumerate(corpo.split("\n")):
+        cab = re.match(r"^(#{1,6})\s+(.*)", linha)
+        if cab:
+            nivel, titulo = len(cab.group(1)), cab.group(2).strip()
+            while secoes and secoes[-1][0] >= nivel:
+                secoes.pop()
+            peso = secoes[-1][2] if secoes else 2
+            normal = sem_acento(titulo)
+            if re.search(r"\b(estado atual|resumo atual|situacao atual|status atual)\b", normal):
+                peso = 3
+            elif re.search(r"\bhistoric[oa]s?\b", normal):
+                peso = 1
+            secoes.append((nivel, titulo, peso))
+        yield i, secoes[-1][1] if secoes else "", secoes[-1][2] if secoes else 2, linha
+
+
 def trechos(texto: str, corpo: str, termos: list, maximo: int = 4, largura: int = 220) -> tuple:
     """Linhas do corpo que contêm os termos, com número da linha no arquivo e a seção em que estão.
-    Prioriza linhas com mais termos distintos; junta a continuação recuada de itens de lista."""
+    Prioriza estado atual e termos distintos; junta continuação recuada de itens de lista."""
     inicio = texto[: len(texto) - len(corpo)].count("\n")
     linhas = corpo.split("\n")
-    sec, achados = "", []
-    for i, linha in enumerate(linhas):
-        cab = re.match(r"^#{1,6}\s+(.*)", linha)
-        if cab:
-            sec = cab.group(1).strip()
-        n = sum(1 for t in termos if t in sem_acento(linha))
+    padroes, achados = padroes_busca(termos), []
+    for i, sec, peso, linha in linhas_busca(corpo):
+        normal = sem_acento(linha)
+        n = sum(bool(p.search(normal)) for p in padroes)
         if n:
-            achados.append((-n, i, sec))
+            achados.append((-int(peso == 3), -n, int(peso == 1), bool(re.match(r"^#{1,6}\s", linha)), i, sec))
     usados, saida = set(), []
-    for _, i, s in sorted(achados)[:maximo]:
+    for _, _, _, _, i, s in sorted(achados)[:maximo]:
         if i in usados:
             continue
         trecho, j = linhas[i].strip(), i + 1
@@ -437,8 +468,8 @@ def trechos(texto: str, corpo: str, termos: list, maximo: int = 4, largura: int 
         usados.add(i)
         if len(trecho) > largura:
             trecho = trecho[:largura] + "…"
-        saida.append((i, f"      L{inicio + i + 1} [{s or '-'}] {trecho}"))
-    return [t for _, t in sorted(saida)], len(achados)
+        saida.append(f"      L{inicio + i + 1} [{s or '-'}] {trecho}")
+    return saida, len(achados)
 
 
 def _custo(linhas) -> int:
@@ -523,6 +554,7 @@ def cmd_buscar(args) -> int:
         raise Erro("--max e --orcamento precisam ser positivos")
     # "backup saúde" num argumento equivale a backup e saúde separados: cada palavra é um termo
     termos = [sem_acento(p) for t in args.termos for p in t.split()]
+    padroes = padroes_busca(termos)
     projeto = sem_acento(args.projeto) if args.projeto else None
     resultados = []
     for arquivo in notas(base):
@@ -541,12 +573,14 @@ def cmd_buscar(args) -> int:
             continue
         if projeto and projeto not in sem_acento(" ".join(como_lista(meta.get("projeto"))) + " " + arquivo.stem):
             continue
-        nome, cabecalho, conteudo = sem_acento(arquivo.stem), sem_acento(json.dumps(meta, ensure_ascii=False)), sem_acento(corpo)
-        pontos = sum(6 * nome.count(t) + 3 * cabecalho.count(t) + min(conteudo.count(t), 5) for t in termos)
+        nome, cabecalho = sem_acento(arquivo.stem), sem_acento(json.dumps(meta, ensure_ascii=False))
+        linhas = [(peso, sem_acento(linha)) for _, _, peso, linha in linhas_busca(corpo)]
+        pontos = sum(12 * len(p.findall(nome)) + 6 * len(p.findall(cabecalho)) +
+                     min(sum(peso * len(p.findall(linha)) for peso, linha in linhas), 10) for p in padroes)
         if pontos or not termos:
             resultados.append((pontos, len(texto), caminho_rel, meta.get("tipo", "?"), meta.get("status", "?"), corpo,
                                texto[:200_000]))
-    resultados.sort(key=lambda r: (-r[0], r[1]))
+    resultados.sort(key=lambda r: (-r[0], r[1], r[2]))
     if args.trechos:
         return _mostrar_trechos(resultados, termos, args)
     # A seleção é um prefixo da ordem de relevância: nenhuma nota menos relevante entra no lugar de
