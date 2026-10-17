@@ -1,8 +1,8 @@
 {
-  "cenario": "Três escalas sintéticas determinísticas, oito consultas por escala",
+  "cenario": "7 escalas planejadas: 6 medidas (1 a 100.000 notas) com 8 consultas cada; 1.000.000 de notas gerada, interrompida por tempo e apresentada só como projeção",
   "referencia_git": "40569e851506e3cd027004960f4b7d217bd0cb32",
   "nucleo_atual_sha256": "16e96249ffb18fe507ac5845b066969cc4b414fa953e867fb8c07f9074255d04",
-  "script_sha256": "c6e73def26dc71e3a6eee6993d6d3d2e182f08390da59e962a41f7ed95bc47af",
+  "script_sha256": "76a083b0abb8dd8c87e6ad28f63f6bc501eae72c08af1e4866aa44e177b040a2",
   "ambiente": {
     "python": "3.14.7",
     "plataforma": "darwin"
@@ -11,78 +11,131 @@
     "max_notas": 5,
     "orcamento_caracteres": 12000
   },
+  "tokenizador": {
+    "biblioteca": "tiktoken 0.14.0",
+    "codificacao": "o200k_base"
+  },
   "escalas": [
     {
       "corpus": {
-        "notas_de_conteudo": 40,
-        "arquivos_markdown": 41,
-        "caracteres": 105046,
-        "bytes_utf8": 110089,
-        "sha256": "9ad29a4e3e4ef9dae07852466ccebc0658542579659b5df8d6b7a76f2507022b"
+        "notas_de_conteudo": 1,
+        "arquivos_markdown": 2,
+        "caracteres": 1668,
+        "bytes_utf8": 1752,
+        "sha256": "22654a62b1823b183e66597d9188009bef47db7642c12e4fa777d4c0fc7c971c",
+        "segundos_para_gerar_e_conferir": 0.0
       },
       "consultas": [
         {
           "termos": [
             "roteamento"
           ],
-          "notas_elegiveis": 10,
-          "notas_selecionadas": 5,
-          "trechos": 20,
+          "notas_elegiveis": 1,
+          "notas_selecionadas": 1,
+          "trechos": 4,
           "mesmas_notas_e_trechos": true,
-          "antes": 6480,
-          "depois": 5770,
-          "reducao_percentual": 11.0,
+          "antes": 1274,
+          "depois": 1274,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 329,
+            "depois": 329
+          },
           "segundos_observados": {
-            "antes": 0.0629,
-            "depois": 0.0587
+            "antes": 0.043,
+            "depois": 0.0421
+          },
+          "cpu_segundos": {
+            "antes": 0.04,
+            "depois": 0.04
+          },
+          "pico_memoria_mb": {
+            "antes": 29.2,
+            "depois": 29.6
           }
         },
         {
           "termos": [
             "validacao"
           ],
-          "notas_elegiveis": 10,
-          "notas_selecionadas": 5,
-          "trechos": 20,
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
           "mesmas_notas_e_trechos": true,
-          "antes": 6470,
-          "depois": 5765,
-          "reducao_percentual": 10.9,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "depois": 0.0558,
-            "antes": 0.0579
+            "depois": 0.0417,
+            "antes": 0.0436
+          },
+          "cpu_segundos": {
+            "depois": 0.039,
+            "antes": 0.041
+          },
+          "pico_memoria_mb": {
+            "depois": 29.3,
+            "antes": 29.2
           }
         },
         {
           "termos": [
             "interface"
           ],
-          "notas_elegiveis": 10,
-          "notas_selecionadas": 5,
-          "trechos": 20,
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
           "mesmas_notas_e_trechos": true,
-          "antes": 6470,
-          "depois": 5765,
-          "reducao_percentual": 10.9,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "antes": 0.0603,
-            "depois": 0.0669
+            "antes": 0.0442,
+            "depois": 0.0444
+          },
+          "cpu_segundos": {
+            "antes": 0.041,
+            "depois": 0.042
+          },
+          "pico_memoria_mb": {
+            "antes": 29.2,
+            "depois": 29.4
           }
         },
         {
           "termos": [
             "publicacao"
           ],
-          "notas_elegiveis": 10,
-          "notas_selecionadas": 5,
-          "trechos": 20,
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
           "mesmas_notas_e_trechos": true,
-          "antes": 6480,
-          "depois": 5770,
-          "reducao_percentual": 11.0,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "depois": 0.0696,
-            "antes": 0.0715
+            "depois": 0.0442,
+            "antes": 0.0438
+          },
+          "cpu_segundos": {
+            "depois": 0.042,
+            "antes": 0.041
+          },
+          "pico_memoria_mb": {
+            "depois": 29.3,
+            "antes": 29.0
           }
         },
         {
@@ -90,16 +143,28 @@
             "roteamento",
             "validacao"
           ],
-          "notas_elegiveis": 20,
-          "notas_selecionadas": 5,
-          "trechos": 20,
+          "notas_elegiveis": 1,
+          "notas_selecionadas": 1,
+          "trechos": 4,
           "mesmas_notas_e_trechos": true,
-          "antes": 8050,
-          "depois": 5769,
-          "reducao_percentual": 28.3,
+          "antes": 1274,
+          "depois": 1274,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 329,
+            "depois": 329
+          },
           "segundos_observados": {
-            "antes": 0.0685,
-            "depois": 0.0739
+            "antes": 0.0411,
+            "depois": 0.0413
+          },
+          "cpu_segundos": {
+            "antes": 0.039,
+            "depois": 0.039
+          },
+          "pico_memoria_mb": {
+            "antes": 29.2,
+            "depois": 29.6
           }
         },
         {
@@ -107,16 +172,28 @@
             "interface",
             "publicacao"
           ],
-          "notas_elegiveis": 20,
-          "notas_selecionadas": 5,
-          "trechos": 20,
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
           "mesmas_notas_e_trechos": true,
-          "antes": 8050,
-          "depois": 5769,
-          "reducao_percentual": 28.3,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "depois": 0.0737,
-            "antes": 0.0813
+            "depois": 0.0421,
+            "antes": 0.0415
+          },
+          "cpu_segundos": {
+            "depois": 0.04,
+            "antes": 0.039
+          },
+          "pico_memoria_mb": {
+            "depois": 29.3,
+            "antes": 29.1
           }
         },
         {
@@ -124,16 +201,28 @@
             "roteamento"
           ],
           "projeto": "Demo-00",
-          "notas_elegiveis": 2,
-          "notas_selecionadas": 2,
-          "trechos": 8,
+          "notas_elegiveis": 1,
+          "notas_selecionadas": 1,
+          "trechos": 4,
           "mesmas_notas_e_trechos": true,
-          "antes": 2378,
-          "depois": 2378,
+          "antes": 1274,
+          "depois": 1274,
           "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 329,
+            "depois": 329
+          },
           "segundos_observados": {
-            "antes": 0.0812,
-            "depois": 0.0865
+            "antes": 0.0414,
+            "depois": 0.042
+          },
+          "cpu_segundos": {
+            "antes": 0.04,
+            "depois": 0.04
+          },
+          "pico_memoria_mb": {
+            "antes": 29.1,
+            "depois": 29.5
           }
         },
         {
@@ -147,16 +236,573 @@
           "antes": 169,
           "depois": 169,
           "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "depois": 0.0995,
-            "antes": 0.0894
+            "depois": 0.0417,
+            "antes": 0.0418
+          },
+          "cpu_segundos": {
+            "depois": 0.04,
+            "antes": 0.039
+          },
+          "pico_memoria_mb": {
+            "depois": 29.4,
+            "antes": 29.1
           }
         }
       ],
       "agregado": {
-        "antes": 44547,
-        "depois": 37155,
-        "reducao_percentual": 16.6
+        "antes": 4667,
+        "depois": 4667,
+        "caracteres_a_menos": 0,
+        "reducao_percentual": 0.0,
+        "tokens": {
+          "antes": 1227,
+          "depois": 1227,
+          "tokens_a_menos": 0,
+          "reducao_percentual": 0.0
+        },
+        "recursos": {
+          "antes": {
+            "segundos_total": 0.34,
+            "cpu_segundos_total": 0.32,
+            "pico_memoria_mb_maximo": 29.2
+          },
+          "depois": {
+            "segundos_total": 0.34,
+            "cpu_segundos_total": 0.322,
+            "pico_memoria_mb_maximo": 29.6
+          }
+        }
+      }
+    },
+    {
+      "corpus": {
+        "notas_de_conteudo": 10,
+        "arquivos_markdown": 11,
+        "caracteres": 25894,
+        "bytes_utf8": 27139,
+        "sha256": "8f604dae8f90bb3ab543e0c55d70fd636d469b0298e9872795cdc3edb6a756e2",
+        "segundos_para_gerar_e_conferir": 0.0
+      },
+      "consultas": [
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "notas_elegiveis": 3,
+          "notas_selecionadas": 3,
+          "trechos": 12,
+          "mesmas_notas_e_trechos": true,
+          "antes": 3482,
+          "depois": 3482,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 889,
+            "depois": 889
+          },
+          "segundos_observados": {
+            "antes": 0.043,
+            "depois": 0.0431
+          },
+          "cpu_segundos": {
+            "antes": 0.041,
+            "depois": 0.041
+          },
+          "pico_memoria_mb": {
+            "antes": 29.5,
+            "depois": 29.5
+          }
+        },
+        {
+          "termos": [
+            "validacao"
+          ],
+          "notas_elegiveis": 3,
+          "notas_selecionadas": 3,
+          "trechos": 12,
+          "mesmas_notas_e_trechos": true,
+          "antes": 3479,
+          "depois": 3479,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 901,
+            "depois": 901
+          },
+          "segundos_observados": {
+            "depois": 0.0434,
+            "antes": 0.0432
+          },
+          "cpu_segundos": {
+            "depois": 0.041,
+            "antes": 0.041
+          },
+          "pico_memoria_mb": {
+            "depois": 29.6,
+            "antes": 29.4
+          }
+        },
+        {
+          "termos": [
+            "interface"
+          ],
+          "notas_elegiveis": 2,
+          "notas_selecionadas": 2,
+          "trechos": 8,
+          "mesmas_notas_e_trechos": true,
+          "antes": 2376,
+          "depois": 2376,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 607,
+            "depois": 607
+          },
+          "segundos_observados": {
+            "antes": 0.0428,
+            "depois": 0.0432
+          },
+          "cpu_segundos": {
+            "antes": 0.04,
+            "depois": 0.041
+          },
+          "pico_memoria_mb": {
+            "antes": 29.3,
+            "depois": 29.6
+          }
+        },
+        {
+          "termos": [
+            "publicacao"
+          ],
+          "notas_elegiveis": 2,
+          "notas_selecionadas": 2,
+          "trechos": 8,
+          "mesmas_notas_e_trechos": true,
+          "antes": 2378,
+          "depois": 2378,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 609,
+            "depois": 609
+          },
+          "segundos_observados": {
+            "depois": 0.0432,
+            "antes": 0.0424
+          },
+          "cpu_segundos": {
+            "depois": 0.041,
+            "antes": 0.041
+          },
+          "pico_memoria_mb": {
+            "depois": 29.7,
+            "antes": 29.4
+          }
+        },
+        {
+          "termos": [
+            "roteamento",
+            "validacao"
+          ],
+          "notas_elegiveis": 6,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 5845,
+          "depois": 5767,
+          "reducao_percentual": 1.3,
+          "tokens": {
+            "antes": 1514,
+            "depois": 1486
+          },
+          "segundos_observados": {
+            "antes": 0.0425,
+            "depois": 0.0436
+          },
+          "cpu_segundos": {
+            "antes": 0.04,
+            "depois": 0.041
+          },
+          "pico_memoria_mb": {
+            "antes": 29.4,
+            "depois": 29.6
+          }
+        },
+        {
+          "termos": [
+            "interface",
+            "publicacao"
+          ],
+          "notas_elegiveis": 4,
+          "notas_selecionadas": 4,
+          "trechos": 16,
+          "mesmas_notas_e_trechos": true,
+          "antes": 4584,
+          "depois": 4584,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 1167,
+            "depois": 1167
+          },
+          "segundos_observados": {
+            "depois": 0.0432,
+            "antes": 0.0431
+          },
+          "cpu_segundos": {
+            "depois": 0.041,
+            "antes": 0.041
+          },
+          "pico_memoria_mb": {
+            "depois": 29.5,
+            "antes": 29.6
+          }
+        },
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "projeto": "Demo-00",
+          "notas_elegiveis": 1,
+          "notas_selecionadas": 1,
+          "trechos": 4,
+          "mesmas_notas_e_trechos": true,
+          "antes": 1274,
+          "depois": 1274,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 329,
+            "depois": 329
+          },
+          "segundos_observados": {
+            "antes": 0.0421,
+            "depois": 0.0429
+          },
+          "cpu_segundos": {
+            "antes": 0.04,
+            "depois": 0.04
+          },
+          "pico_memoria_mb": {
+            "antes": 29.4,
+            "depois": 29.4
+          }
+        },
+        {
+          "termos": [
+            "inexistentezzz"
+          ],
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
+          "mesmas_notas_e_trechos": true,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
+          "segundos_observados": {
+            "depois": 0.0427,
+            "antes": 0.0427
+          },
+          "cpu_segundos": {
+            "depois": 0.04,
+            "antes": 0.04
+          },
+          "pico_memoria_mb": {
+            "depois": 29.4,
+            "antes": 29.5
+          }
+        }
+      ],
+      "agregado": {
+        "antes": 23587,
+        "depois": 23509,
+        "caracteres_a_menos": 78,
+        "reducao_percentual": 0.3,
+        "tokens": {
+          "antes": 6064,
+          "depois": 6036,
+          "tokens_a_menos": 28,
+          "reducao_percentual": 0.5
+        },
+        "recursos": {
+          "antes": {
+            "segundos_total": 0.342,
+            "cpu_segundos_total": 0.324,
+            "pico_memoria_mb_maximo": 29.6
+          },
+          "depois": {
+            "segundos_total": 0.345,
+            "cpu_segundos_total": 0.326,
+            "pico_memoria_mb_maximo": 29.7
+          }
+        }
+      }
+    },
+    {
+      "corpus": {
+        "notas_de_conteudo": 100,
+        "arquivos_markdown": 101,
+        "caracteres": 268174,
+        "bytes_utf8": 281029,
+        "sha256": "095e055ada08fd1b57afc8d29c7fd5c878075357217cf375cdb6105770563e34",
+        "segundos_para_gerar_e_conferir": 0.0
+      },
+      "consultas": [
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "notas_elegiveis": 25,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 8850,
+          "depois": 5772,
+          "reducao_percentual": 34.8,
+          "tokens": {
+            "antes": 2509,
+            "depois": 1474
+          },
+          "segundos_observados": {
+            "antes": 0.054,
+            "depois": 0.065
+          },
+          "cpu_segundos": {
+            "antes": 0.052,
+            "depois": 0.06
+          },
+          "pico_memoria_mb": {
+            "antes": 29.6,
+            "depois": 29.8
+          }
+        },
+        {
+          "termos": [
+            "validacao"
+          ],
+          "notas_elegiveis": 25,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 8825,
+          "depois": 5767,
+          "reducao_percentual": 34.7,
+          "tokens": {
+            "antes": 2529,
+            "depois": 1494
+          },
+          "segundos_observados": {
+            "depois": 0.0566,
+            "antes": 0.0595
+          },
+          "cpu_segundos": {
+            "depois": 0.054,
+            "antes": 0.056
+          },
+          "pico_memoria_mb": {
+            "depois": 29.7,
+            "antes": 29.6
+          }
+        },
+        {
+          "termos": [
+            "interface"
+          ],
+          "notas_elegiveis": 25,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 8825,
+          "depois": 5767,
+          "reducao_percentual": 34.7,
+          "tokens": {
+            "antes": 2484,
+            "depois": 1469
+          },
+          "segundos_observados": {
+            "antes": 0.0557,
+            "depois": 0.0559
+          },
+          "cpu_segundos": {
+            "antes": 0.054,
+            "depois": 0.054
+          },
+          "pico_memoria_mb": {
+            "antes": 29.6,
+            "depois": 29.7
+          }
+        },
+        {
+          "termos": [
+            "publicacao"
+          ],
+          "notas_elegiveis": 25,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 8850,
+          "depois": 5772,
+          "reducao_percentual": 34.8,
+          "tokens": {
+            "antes": 2509,
+            "depois": 1474
+          },
+          "segundos_observados": {
+            "depois": 0.0563,
+            "antes": 0.0549
+          },
+          "cpu_segundos": {
+            "depois": 0.054,
+            "antes": 0.053
+          },
+          "pico_memoria_mb": {
+            "depois": 29.8,
+            "antes": 29.6
+          }
+        },
+        {
+          "termos": [
+            "roteamento",
+            "validacao"
+          ],
+          "notas_elegiveis": 50,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11988,
+          "depois": 5769,
+          "reducao_percentual": 51.9,
+          "tokens": {
+            "antes": 3585,
+            "depois": 1486
+          },
+          "segundos_observados": {
+            "antes": 0.0568,
+            "depois": 0.0588
+          },
+          "cpu_segundos": {
+            "antes": 0.054,
+            "depois": 0.056
+          },
+          "pico_memoria_mb": {
+            "antes": 29.8,
+            "depois": 29.9
+          }
+        },
+        {
+          "termos": [
+            "interface",
+            "publicacao"
+          ],
+          "notas_elegiveis": 50,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11989,
+          "depois": 5769,
+          "reducao_percentual": 51.9,
+          "tokens": {
+            "antes": 3551,
+            "depois": 1471
+          },
+          "segundos_observados": {
+            "depois": 0.0591,
+            "antes": 0.0654
+          },
+          "cpu_segundos": {
+            "depois": 0.056,
+            "antes": 0.062
+          },
+          "pico_memoria_mb": {
+            "depois": 29.9,
+            "antes": 29.8
+          }
+        },
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "projeto": "Demo-00",
+          "notas_elegiveis": 4,
+          "notas_selecionadas": 4,
+          "trechos": 16,
+          "mesmas_notas_e_trechos": true,
+          "antes": 4586,
+          "depois": 4586,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 1169,
+            "depois": 1169
+          },
+          "segundos_observados": {
+            "antes": 0.048,
+            "depois": 0.0486
+          },
+          "cpu_segundos": {
+            "antes": 0.046,
+            "depois": 0.046
+          },
+          "pico_memoria_mb": {
+            "antes": 29.4,
+            "depois": 29.5
+          }
+        },
+        {
+          "termos": [
+            "inexistentezzz"
+          ],
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
+          "mesmas_notas_e_trechos": true,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
+          "segundos_observados": {
+            "depois": 0.0561,
+            "antes": 0.058
+          },
+          "cpu_segundos": {
+            "depois": 0.053,
+            "antes": 0.055
+          },
+          "pico_memoria_mb": {
+            "depois": 29.6,
+            "antes": 29.4
+          }
+        }
+      ],
+      "agregado": {
+        "antes": 64082,
+        "depois": 39371,
+        "caracteres_a_menos": 24711,
+        "reducao_percentual": 38.6,
+        "tokens": {
+          "antes": 18384,
+          "depois": 10085,
+          "tokens_a_menos": 8299,
+          "reducao_percentual": 45.1
+        },
+        "recursos": {
+          "antes": {
+            "segundos_total": 0.452,
+            "cpu_segundos_total": 0.432,
+            "pico_memoria_mb_maximo": 29.8
+          },
+          "depois": {
+            "segundos_total": 0.456,
+            "cpu_segundos_total": 0.433,
+            "pico_memoria_mb_maximo": 29.9
+          }
+        }
       }
     },
     {
@@ -165,7 +811,8 @@
         "arquivos_markdown": 1001,
         "caracteres": 2690974,
         "bytes_utf8": 2819929,
-        "sha256": "d9a3d7b5e4193d72eb69db68908a7d0a0b71be372e8edb59c8c5d068f1802b8d"
+        "sha256": "d9a3d7b5e4193d72eb69db68908a7d0a0b71be372e8edb59c8c5d068f1802b8d",
+        "segundos_para_gerar_e_conferir": 0.1
       },
       "consultas": [
         {
@@ -179,9 +826,21 @@
           "antes": 11937,
           "depois": 5774,
           "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3541,
+            "depois": 1474
+          },
           "segundos_observados": {
-            "antes": 0.4932,
-            "depois": 0.4785
+            "antes": 0.1748,
+            "depois": 0.237
+          },
+          "cpu_segundos": {
+            "antes": 0.17,
+            "depois": 0.202
+          },
+          "pico_memoria_mb": {
+            "antes": 31.2,
+            "depois": 31.7
           }
         },
         {
@@ -195,9 +854,21 @@
           "antes": 11970,
           "depois": 5769,
           "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3593,
+            "depois": 1494
+          },
           "segundos_observados": {
-            "depois": 0.3751,
-            "antes": 0.302
+            "depois": 0.1801,
+            "antes": 0.1683
+          },
+          "cpu_segundos": {
+            "depois": 0.177,
+            "antes": 0.165
+          },
+          "pico_memoria_mb": {
+            "depois": 31.2,
+            "antes": 31.2
           }
         },
         {
@@ -211,9 +882,21 @@
           "antes": 11970,
           "depois": 5769,
           "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3528,
+            "depois": 1469
+          },
           "segundos_observados": {
-            "antes": 0.3475,
-            "depois": 0.3856
+            "antes": 0.1671,
+            "depois": 0.1785
+          },
+          "cpu_segundos": {
+            "antes": 0.164,
+            "depois": 0.176
+          },
+          "pico_memoria_mb": {
+            "antes": 31.3,
+            "depois": 31.2
           }
         },
         {
@@ -227,9 +910,21 @@
           "antes": 11937,
           "depois": 5774,
           "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3541,
+            "depois": 1474
+          },
           "segundos_observados": {
-            "depois": 0.5559,
-            "antes": 0.493
+            "depois": 0.1715,
+            "antes": 0.1664
+          },
+          "cpu_segundos": {
+            "depois": 0.169,
+            "antes": 0.163
+          },
+          "pico_memoria_mb": {
+            "depois": 31.2,
+            "antes": 31.2
           }
         },
         {
@@ -244,9 +939,21 @@
           "antes": 11987,
           "depois": 5769,
           "reducao_percentual": 51.9,
+          "tokens": {
+            "antes": 3593,
+            "depois": 1494
+          },
           "segundos_observados": {
-            "antes": 0.3928,
-            "depois": 0.3881
+            "antes": 0.1815,
+            "depois": 0.1744
+          },
+          "cpu_segundos": {
+            "antes": 0.179,
+            "depois": 0.172
+          },
+          "pico_memoria_mb": {
+            "antes": 32.9,
+            "depois": 33.0
           }
         },
         {
@@ -261,9 +968,21 @@
           "antes": 11987,
           "depois": 5769,
           "reducao_percentual": 51.9,
+          "tokens": {
+            "antes": 3545,
+            "depois": 1469
+          },
           "segundos_observados": {
-            "depois": 0.3328,
-            "antes": 0.4935
+            "depois": 0.1764,
+            "antes": 0.182
+          },
+          "cpu_segundos": {
+            "depois": 0.173,
+            "antes": 0.179
+          },
+          "pico_memoria_mb": {
+            "depois": 33.2,
+            "antes": 33.0
           }
         },
         {
@@ -278,9 +997,21 @@
           "antes": 10589,
           "depois": 5772,
           "reducao_percentual": 45.5,
+          "tokens": {
+            "antes": 3092,
+            "depois": 1474
+          },
           "segundos_observados": {
-            "antes": 0.3542,
-            "depois": 0.1761
+            "antes": 0.0915,
+            "depois": 0.0955
+          },
+          "cpu_segundos": {
+            "antes": 0.088,
+            "depois": 0.092
+          },
+          "pico_memoria_mb": {
+            "antes": 30.0,
+            "depois": 29.9
           }
         },
         {
@@ -294,16 +1025,47 @@
           "antes": 169,
           "depois": 169,
           "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "depois": 0.2852,
-            "antes": 0.2179
+            "depois": 0.1814,
+            "antes": 0.1639
+          },
+          "cpu_segundos": {
+            "depois": 0.177,
+            "antes": 0.16
+          },
+          "pico_memoria_mb": {
+            "depois": 29.7,
+            "antes": 29.5
           }
         }
       ],
       "agregado": {
         "antes": 82546,
         "depois": 40565,
-        "reducao_percentual": 50.9
+        "caracteres_a_menos": 41981,
+        "reducao_percentual": 50.9,
+        "tokens": {
+          "antes": 24481,
+          "depois": 10396,
+          "tokens_a_menos": 14085,
+          "reducao_percentual": 57.5
+        },
+        "recursos": {
+          "antes": {
+            "segundos_total": 1.296,
+            "cpu_segundos_total": 1.268,
+            "pico_memoria_mb_maximo": 33.0
+          },
+          "depois": {
+            "segundos_total": 1.395,
+            "cpu_segundos_total": 1.338,
+            "pico_memoria_mb_maximo": 33.2
+          }
+        }
       }
     },
     {
@@ -312,7 +1074,8 @@
         "arquivos_markdown": 10001,
         "caracteres": 26918974,
         "bytes_utf8": 28208929,
-        "sha256": "676678e62c3ae9b2d9d2cdf4c604551d20af1af034c2d0e1c54ba49a2a57d7da"
+        "sha256": "676678e62c3ae9b2d9d2cdf4c604551d20af1af034c2d0e1c54ba49a2a57d7da",
+        "segundos_para_gerar_e_conferir": 0.8
       },
       "consultas": [
         {
@@ -326,9 +1089,21 @@
           "antes": 11939,
           "depois": 5776,
           "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3543,
+            "depois": 1476
+          },
           "segundos_observados": {
-            "antes": 3.3326,
-            "depois": 2.4433
+            "antes": 1.6842,
+            "depois": 1.4467
+          },
+          "cpu_segundos": {
+            "antes": 1.668,
+            "depois": 1.434
+          },
+          "pico_memoria_mb": {
+            "antes": 47.4,
+            "depois": 47.6
           }
         },
         {
@@ -342,9 +1117,21 @@
           "antes": 11972,
           "depois": 5771,
           "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3595,
+            "depois": 1496
+          },
           "segundos_observados": {
-            "depois": 2.1095,
-            "antes": 2.1312
+            "depois": 1.3538,
+            "antes": 1.5901
+          },
+          "cpu_segundos": {
+            "depois": 1.345,
+            "antes": 1.578
+          },
+          "pico_memoria_mb": {
+            "depois": 47.5,
+            "antes": 47.3
           }
         },
         {
@@ -358,9 +1145,21 @@
           "antes": 11972,
           "depois": 5771,
           "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3530,
+            "depois": 1471
+          },
           "segundos_observados": {
-            "antes": 2.909,
-            "depois": 1.868
+            "antes": 1.5485,
+            "depois": 1.3554
+          },
+          "cpu_segundos": {
+            "antes": 1.538,
+            "depois": 1.337
+          },
+          "pico_memoria_mb": {
+            "antes": 47.6,
+            "depois": 47.6
           }
         },
         {
@@ -374,9 +1173,21 @@
           "antes": 11939,
           "depois": 5776,
           "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3543,
+            "depois": 1476
+          },
           "segundos_observados": {
-            "depois": 1.7694,
-            "antes": 2.1152
+            "depois": 1.3289,
+            "antes": 1.5814
+          },
+          "cpu_segundos": {
+            "depois": 1.319,
+            "antes": 1.569
+          },
+          "pico_memoria_mb": {
+            "depois": 47.4,
+            "antes": 47.4
           }
         },
         {
@@ -391,9 +1202,21 @@
           "antes": 11972,
           "depois": 5771,
           "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3595,
+            "depois": 1496
+          },
           "segundos_observados": {
-            "antes": 3.7935,
-            "depois": 1.9195
+            "antes": 2.6735,
+            "depois": 1.3742
+          },
+          "cpu_segundos": {
+            "antes": 2.659,
+            "depois": 1.362
+          },
+          "pico_memoria_mb": {
+            "antes": 63.9,
+            "depois": 64.0
           }
         },
         {
@@ -408,9 +1231,21 @@
           "antes": 11972,
           "depois": 5771,
           "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3530,
+            "depois": 1471
+          },
           "segundos_observados": {
-            "depois": 2.2384,
-            "antes": 3.829
+            "depois": 1.4111,
+            "antes": 2.6859
+          },
+          "cpu_segundos": {
+            "depois": 1.396,
+            "antes": 2.673
+          },
+          "pico_memoria_mb": {
+            "depois": 64.1,
+            "antes": 64.1
           }
         },
         {
@@ -425,9 +1260,21 @@
           "antes": 11937,
           "depois": 5774,
           "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3541,
+            "depois": 1474
+          },
           "segundos_observados": {
-            "antes": 0.7547,
-            "depois": 0.8064
+            "antes": 0.5436,
+            "depois": 0.5142
+          },
+          "cpu_segundos": {
+            "antes": 0.539,
+            "depois": 0.51
+          },
+          "pico_memoria_mb": {
+            "antes": 33.0,
+            "depois": 33.0
           }
         },
         {
@@ -441,33 +1288,383 @@
           "antes": 169,
           "depois": 169,
           "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
           "segundos_observados": {
-            "depois": 1.864,
-            "antes": 1.7843
+            "depois": 1.3105,
+            "antes": 1.2738
+          },
+          "cpu_segundos": {
+            "depois": 1.301,
+            "antes": 1.245
+          },
+          "pico_memoria_mb": {
+            "depois": 30.7,
+            "antes": 30.6
           }
         }
       ],
       "agregado": {
         "antes": 83872,
         "depois": 40579,
-        "reducao_percentual": 51.6
+        "caracteres_a_menos": 43293,
+        "reducao_percentual": 51.6,
+        "tokens": {
+          "antes": 24925,
+          "depois": 10408,
+          "tokens_a_menos": 14517,
+          "reducao_percentual": 58.2
+        },
+        "recursos": {
+          "antes": {
+            "segundos_total": 13.581,
+            "cpu_segundos_total": 13.469,
+            "pico_memoria_mb_maximo": 64.1
+          },
+          "depois": {
+            "segundos_total": 10.095,
+            "cpu_segundos_total": 10.004,
+            "pico_memoria_mb_maximo": 64.1
+          }
+        }
+      }
+    },
+    {
+      "corpus": {
+        "notas_de_conteudo": 100000,
+        "arquivos_markdown": 100001,
+        "caracteres": 269198974,
+        "bytes_utf8": 282098929,
+        "sha256": "9b007720e034eee4f62f5bf1c04a09123e8f42c7bd309cf0f5567a604cfc0ef0",
+        "segundos_para_gerar_e_conferir": 15.8
+      },
+      "consultas": [
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "notas_elegiveis": 25000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11941,
+          "depois": 5778,
+          "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3543,
+            "depois": 1476
+          },
+          "segundos_observados": {
+            "antes": 55.8793,
+            "depois": 19.651
+          },
+          "cpu_segundos": {
+            "antes": 49.937,
+            "depois": 13.764
+          },
+          "pico_memoria_mb": {
+            "antes": 205.2,
+            "depois": 205.3
+          }
+        },
+        {
+          "termos": [
+            "validacao"
+          ],
+          "notas_elegiveis": 25000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11974,
+          "depois": 5773,
+          "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3595,
+            "depois": 1496
+          },
+          "segundos_observados": {
+            "depois": 19.6505,
+            "antes": 56.5787
+          },
+          "cpu_segundos": {
+            "depois": 13.748,
+            "antes": 50.729
+          },
+          "pico_memoria_mb": {
+            "depois": 205.3,
+            "antes": 205.2
+          }
+        },
+        {
+          "termos": [
+            "interface"
+          ],
+          "notas_elegiveis": 25000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11974,
+          "depois": 5773,
+          "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3530,
+            "depois": 1471
+          },
+          "segundos_observados": {
+            "antes": 57.6426,
+            "depois": 21.185
+          },
+          "cpu_segundos": {
+            "antes": 50.328,
+            "depois": 13.945
+          },
+          "pico_memoria_mb": {
+            "antes": 205.4,
+            "depois": 205.4
+          }
+        },
+        {
+          "termos": [
+            "publicacao"
+          ],
+          "notas_elegiveis": 25000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11941,
+          "depois": 5778,
+          "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3543,
+            "depois": 1476
+          },
+          "segundos_observados": {
+            "depois": 20.8223,
+            "antes": 57.3256
+          },
+          "cpu_segundos": {
+            "depois": 13.642,
+            "antes": 50.087
+          },
+          "pico_memoria_mb": {
+            "depois": 205.4,
+            "antes": 205.4
+          }
+        },
+        {
+          "termos": [
+            "roteamento",
+            "validacao"
+          ],
+          "notas_elegiveis": 50000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11974,
+          "depois": 5773,
+          "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3595,
+            "depois": 1496
+          },
+          "segundos_observados": {
+            "antes": 183.1828,
+            "depois": 22.3829
+          },
+          "cpu_segundos": {
+            "antes": 174.425,
+            "depois": 13.598
+          },
+          "pico_memoria_mb": {
+            "antes": 374.2,
+            "depois": 373.9
+          }
+        },
+        {
+          "termos": [
+            "interface",
+            "publicacao"
+          ],
+          "notas_elegiveis": 50000,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11974,
+          "depois": 5773,
+          "reducao_percentual": 51.8,
+          "tokens": {
+            "antes": 3530,
+            "depois": 1471
+          },
+          "segundos_observados": {
+            "depois": 21.7686,
+            "antes": 169.7204
+          },
+          "cpu_segundos": {
+            "depois": 13.687,
+            "antes": 161.876
+          },
+          "pico_memoria_mb": {
+            "depois": 374.0,
+            "antes": 373.1
+          }
+        },
+        {
+          "termos": [
+            "roteamento"
+          ],
+          "projeto": "Demo-00",
+          "notas_elegiveis": 3572,
+          "notas_selecionadas": 5,
+          "trechos": 20,
+          "mesmas_notas_e_trechos": true,
+          "antes": 11939,
+          "depois": 5776,
+          "reducao_percentual": 51.6,
+          "tokens": {
+            "antes": 3543,
+            "depois": 1476
+          },
+          "segundos_observados": {
+            "antes": 13.8258,
+            "depois": 13.2962
+          },
+          "cpu_segundos": {
+            "antes": 6.125,
+            "depois": 5.556
+          },
+          "pico_memoria_mb": {
+            "antes": 65.4,
+            "depois": 65.6
+          }
+        },
+        {
+          "termos": [
+            "inexistentezzz"
+          ],
+          "notas_elegiveis": 0,
+          "notas_selecionadas": 0,
+          "trechos": 0,
+          "mesmas_notas_e_trechos": true,
+          "antes": 169,
+          "depois": 169,
+          "reducao_percentual": 0.0,
+          "tokens": {
+            "antes": 48,
+            "depois": 48
+          },
+          "segundos_observados": {
+            "depois": 21.4163,
+            "antes": 19.8693
+          },
+          "cpu_segundos": {
+            "depois": 13.363,
+            "antes": 12.076
+          },
+          "pico_memoria_mb": {
+            "depois": 42.2,
+            "antes": 42.3
+          }
+        }
+      ],
+      "agregado": {
+        "antes": 83886,
+        "depois": 40593,
+        "caracteres_a_menos": 43293,
+        "reducao_percentual": 51.6,
+        "tokens": {
+          "antes": 24927,
+          "depois": 10410,
+          "tokens_a_menos": 14517,
+          "reducao_percentual": 58.2
+        },
+        "recursos": {
+          "antes": {
+            "segundos_total": 614.024,
+            "cpu_segundos_total": 555.583,
+            "pico_memoria_mb_maximo": 374.2
+          },
+          "depois": {
+            "segundos_total": 160.173,
+            "cpu_segundos_total": 101.303,
+            "pico_memoria_mb_maximo": 374.0
+          }
+        }
+      }
+    }
+  ],
+  "nao_executadas": [
+    {
+      "notas_de_conteudo": 1000000,
+      "motivo": "interrompida por custo de tempo: o acervo de 1.000.000 de notas foi gerado em disco, mas a primeira busca da versão anterior não terminou; a projeção abaixo estima cerca de 7,7 h para as 16 buscas",
+      "observado": {
+        "consulta": [
+          "roteamento"
+        ],
+        "versao": "antes",
+        "concluida": false,
+        "interrompida_apos_segundos": 1338,
+        "cpu_segundos_ate_interromper": 1216.8,
+        "nota": "limite inferior real: a busca levaria mais que isso"
+      },
+      "corpus": {
+        "notas_de_conteudo": 1000000,
+        "arquivos_markdown": 1000001,
+        "caracteres": 2699198974,
+        "bytes_utf8": 2828198929,
+        "como_obtido": "acervo gerado em disco nesta execução; tamanho recalculado exatamente a partir do gerador determinístico, porque a escala foi interrompida antes de gravar o resultado",
+        "disco_ocupado_aprox_gb": 3.8
       }
     }
   ],
   "total": {
-    "consultas_pareadas": 24,
-    "execucoes": 48,
-    "antes": 210965,
-    "depois": 118299,
-    "caracteres_a_menos": 92666,
-    "reducao_percentual": 43.9,
-    "mesmas_notas_e_trechos_em_todas": true
+    "consultas_pareadas": 48,
+    "execucoes": 96,
+    "antes": 342640,
+    "depois": 189284,
+    "caracteres_a_menos": 153356,
+    "reducao_percentual": 44.8,
+    "mesmas_notas_e_trechos_em_todas": true,
+    "tokens": {
+      "antes": 100008,
+      "depois": 48562,
+      "tokens_a_menos": 51446,
+      "reducao_percentual": 51.4
+    }
   },
   "limites": [
-    "Corpora inteiramente sintéticos; os prefixos se repetem entre escalas.",
+    "Corpora inteiramente sintéticos; cada escala é o prefixo da seguinte.",
+    "O acervo cresce num único diretório temporário; cada escala é medida sobre exatamente o seu prefixo, igual a gerar a escala do zero.",
     "O tamanho do maior corpus é contado uma vez, sem multiplicar pelas consultas.",
-    "As saídas incluem omissões, resumo e quebras de linha; não são tokens de IA.",
-    "Tempos são uma passagem por caso, sem controle de cache nem repetições estatísticas.",
+    "As saídas incluem omissões, resumo e quebras de linha.",
+    "Tokens, quando presentes, usam o200k_base (tiktoken), não o tokenizador do Claude, e medem só a saída da busca, não a conversa inteira.",
+    "Tempo, CPU e memória: uma passagem por caso, sem controle de cache nem repetições estatísticas; incluem a inicialização do Python.",
     "Não mede inferências, produtividade, qualidade geral das IAs ou economia financeira."
-  ]
+  ],
+  "projecao_1000000": {
+    "situacao": "projeção matemática, não medida",
+    "metodo": {
+      "caracteres_e_tokens": "as saídas são limitadas por 5 notas e 12.000 caracteres por consulta; de 10.000 para 100.000 notas mudaram só os dígitos das contagens. A projeção repete esse acréscimo de 100.000 para 1.000.000.",
+      "tempo": "lei de potência por versão: o fator de crescimento do tempo total de 10.000 para 100.000 notas (anterior ×45.2, atual ×15.9) é aplicado de novo de 100.000 para 1.000.000.",
+      "memoria": "extrapolação linear do pico entre 10.000 e 100.000 notas."
+    },
+    "caracteres": {
+      "antes": 83900,
+      "depois": 40607,
+      "reducao_percentual": 51.6
+    },
+    "tokens": {
+      "antes": 24929,
+      "depois": 10412,
+      "reducao_percentual": 58.2
+    },
+    "segundos_total": {
+      "antes": 27761,
+      "depois": 2541
+    },
+    "pico_memoria_mb": 3475,
+    "coerencia_com_o_observado": "a busca 'roteamento' da versão anterior levou 55,9 s em 100.000 notas; com o mesmo fator dessa consulta (×33,2) a projeção seria ~31 min, compatível com a interrupção após 22,3 min sem terminar."
+  }
 }

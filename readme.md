@@ -14,30 +14,37 @@ O vídeo usa a voz do Noah para mostrar o fluxo: o agente principal consulta o C
 
 O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. A capa acima é estática; o MP4 original, com narração, foi mantido.
 
-## Benchmark ampliado: 10.000 notas e 26,9 milhões de caracteres
+## Benchmark de contexto: de 1 nota a 1 milhão de notas
 
-[![Benchmark ampliado: três escalas, 24 consultas pareadas e 43,9% menos texto retornado no agregado](media/one-pager.png)](media/one-pager.png)
+[![Benchmark de contexto: seis escalas medidas, de 1 a 100.000 notas, e 1 milhão de notas como projeção identificada](media/one-pager.png)](media/one-pager.png)
 
 [Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
 
-Análise com dados **inteiramente sintéticos**, em três escalas: 40, 1.000 e 10.000 notas de conteúdo. O maior acervo tem **26.918.974 caracteres**, mais de 28 MB em UTF-8, incluindo um protocolo mínimo. São oito consultas distintas por escala, cobrindo temas, múltiplos termos, filtro de projeto e ausência de resultado: **24 comparações e 48 execuções**.
+Análise com dados **inteiramente sintéticos** em sete escalas. **Seis foram medidas:** 1, 10, 100, 1.000, 10.000 e 100.000 notas de conteúdo, até 282,1 MB, com oito consultas distintas por escala: **48 comparações e 96 execuções**. **1 milhão de notas aparece só como projeção.** O acervo de 2,83 GB foi gerado em disco, mas a primeira busca da versão anterior passou de 22 minutos sem terminar, e a medição completa levaria cerca de 8 horas.
 
-| Escala | Texto retornado antes | Agora | Redução |
-|---|---:|---:|---:|
-| 40 notas, 8 consultas | 44.547 | 37.155 | 16,6% |
-| 1.000 notas, 8 consultas | 82.546 | 40.565 | 50,9% |
-| 10.000 notas, 8 consultas | 83.872 | 40.579 | 51,6% |
-| **Total de 24 consultas** | **210.965** | **118.299** | **43,9%** |
+| Escala | Texto retornado antes | Agora | Redução em caracteres | Redução em tokens* | 8 buscas, antes → agora |
+|---|---:|---:|---:|---:|---:|
+| 1 nota | 4.667 | 4.667 | 0,0% | 0,0% | 0,3 s → 0,3 s |
+| 10 notas | 23.587 | 23.509 | 0,3% | 0,5% | 0,3 s → 0,3 s |
+| 100 notas | 64.082 | 39.371 | 38,6% | 45,1% | 0,5 s → 0,5 s |
+| 1.000 notas | 82.546 | 40.565 | 50,9% | 57,5% | 1,3 s → 1,4 s |
+| 10.000 notas | 83.872 | 40.579 | 51,6% | 58,2% | 13,6 s → 10,1 s |
+| 100.000 notas | 83.886 | 40.593 | 51,6% | 58,2% | 10 min → 3 min |
+| *1.000.000 notas, projeção* | *≈ 83.900* | *≈ 40.607* | *≈ 51,6%* | *≈ 58,2%* | *≈ 7,7 h → 42 min* |
+| **Total medido, 48 consultas** | **342.640** | **189.284** | **44,8%** | **51,4%** | |
 
-**Mesmas notas e trechos em todas as comparações**, com o mesmo limite de cinco notas e 12.000 caracteres por consulta. Os totais acima somam saídas de consultas distintas. O tamanho do acervo é contado separadamente e não representa conteúdo inteiro enviado à IA.
+**Mesmas notas e trechos em todas as comparações medidas**, com o mesmo limite de cinco notas e 12.000 caracteres por consulta. Com 1 nota não há o que economizar. A redução aparece a partir de 100 notas e estabiliza entre 50,9% a 51,6% de 1.000 notas em diante, porque as duas versões atingem o mesmo teto. A economia de contexto não custou tempo: em 100.000 notas, a busca atual foi 3,8× mais rápida.
+
+\* Tokens contados com tiktoken `o200k_base`, sem chamar API. Não é o tokenizador do Claude e mede só o texto devolvido pela busca, não a conversa inteira. Os totais somam consultas distintas, e o tamanho do acervo não representa conteúdo enviado à IA.
 
 ### Reproduzir a análise
 
 ```bash
 python3 tools/benchmark_busca.py --ampliado
+python3 tools/benchmark_busca.py --escalas 1 10 100 1000 10000 100000 --parcial progresso.json
 ```
 
-[Método e limites](docs/BENCHMARK.md) · [Resultados completos, consultas, hashes e tempos observados](docs/benchmark-ampliado.json). O comando sem `--ampliado` mantém o exemplo rápido original de 40 notas. A medição local anterior de 60,9% pertence a uma consulta específica e não é extrapolada para esta bateria. Caracteres de saída não medem tokens totais, produtividade ou economia financeira. O acervo pessoal não é distribuído.
+O primeiro comando mede de 1 a 10.000 notas em cerca de 30 segundos. O segundo inclui 100.000 notas e pode ser retomado pelo arquivo de progresso. Há também `--completo`, que inclui 1 milhão de notas: cerca de 4 GB temporários e 8 horas. [Método, projeção, custos e limites](docs/BENCHMARK.md) · [Resultados completos](docs/benchmark-ampliado.json) · [Ensaio anterior, de três escalas](docs/benchmark-tres-escalas-2026-10-16.json). A medição local anterior de 60,9% pertence a uma consulta específica e não é extrapolada para esta bateria. O acervo pessoal não é distribuído.
 
 ## Arquitetura de delegação
 
