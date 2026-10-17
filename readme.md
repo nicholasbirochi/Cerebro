@@ -114,4 +114,4 @@ Use o repositório como distribuição de ferramentas, mantendo o cofre pessoal 
 
 ## Licença
 
-O código e a documentação originais deste projeto estão disponíveis sob a [licença MIT](LICENSE). Referências a serviços, ferramentas e modelos de terceiros seguem as condições dos respectivos fornecedores.
+O código e a documentação originais deste projeto estão disponíveis sob a [licença MIT](license). Referências a serviços, ferramentas e modelos de terceiros seguem as condições dos respectivos fornecedores.

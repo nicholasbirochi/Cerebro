@@ -1,8 +1,8 @@
 # Public distribution: only explicitly listed files may be committed.
 *
 !.gitignore
-!README.md
-!LICENSE
+!readme.md
+!license
 !index.html
 !.nojekyll
 !docs/
