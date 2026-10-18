@@ -13,6 +13,7 @@ import tempfile
 import unicodedata
 import unittest
 from pathlib import Path
+from unittest import mock
 
 SCRIPT = Path(__file__).resolve().parent / "cerebro.py"
 spec = importlib.util.spec_from_file_location("cerebro", SCRIPT)
@@ -314,6 +315,27 @@ class CofreSintetico(unittest.TestCase):
                 self.assertIn("--trechos", texto)
                 self.assertLess(len(texto), 2_500)
         self.assertIn('--projeto "Sintetico"', self.contexto_do_hook(str(self.projeto)))
+
+    def test_linha_de_economia_so_com_principal_conhecido_e_modo_ativo(self):
+        # Roteador sintético ao lado de uma cópia do script: nunca lê a cota real.
+        pasta = self.tmp / "ferramenta"
+        pasta.mkdir()
+        (pasta / "auxiliares.py").write_text(
+            "def economy_status(p):\n"
+            "    return {'ativo': p == 'codex', 'motivo': '93% da cota semanal', 'reinicia': '25/10 00:54'}\n")
+        codex = {"transcript_path": "/u/.codex/sessions/2026/10/18/rollout-x.jsonl"}
+        claude = {"transcript_path": "/u/.claude/projects/x/y.jsonl"}
+        with mock.patch.object(cerebro, "__file__", str(pasta / "cerebro.py")):
+            linha = cerebro.linha_economia(codex)
+            self.assertIn("Modo economia (Codex: 93% da cota semanal; reinicia 25/10 00:54)", linha)
+            self.assertIn("--tipo codigo", linha)
+            self.assertEqual(cerebro.linha_economia(claude), "")
+            self.assertEqual(cerebro.linha_economia({}), "")
+            self.assertEqual(cerebro.linha_economia(None), "")
+            (pasta / "auxiliares.py").write_text("raise RuntimeError('quebrado')\n")
+            self.assertEqual(cerebro.linha_economia(codex), "")
+        texto = self.contexto_do_hook(str(self.fora))  # sem transcript_path: hook igual ao de antes
+        self.assertNotIn("Modo economia", texto)
 
     def test_secao_resumo_do_hook_no_protocolo_substitui_o_padrao(self):
         (self.base / cerebro.PROTOCOLO).write_text(nota("regra", extra="autorizacao: teste\n", corpo=(

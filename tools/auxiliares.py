@@ -123,13 +123,19 @@ def family(name):
 
 
 # Local first: free, private and no Claude/GPT tokens. Each route is tried in order;
-# a local model is used only if resident, or installed with nothing else loaded.
+# a local model is used if resident, installed with nothing else loaded, or installed
+# and larger than the resident models when there is memory for it (SWAP_MIN_FREE_GB).
 ROUTES = {
     "mecanica": ("qwen2.5-coder:7b", "qwen2.5-coder:14b", "nemotron", "copilot"),
     "codigo": ("qwen2.5-coder:14b", "qwen3-coder:30b", "qwen2.5-coder:7b", "copilot", "nemotron"),
     "analise": ("qwen3-coder:30b", "nemotron", "qwen2.5-coder:14b", "copilot"),
 }
 BIG_MODEL_MIN_FREE_GB = 20  # 30B (~18 GB) loads only when this much memory is reclaimable.
+# A smaller resident model (e.g. a 7B left by a mechanical task) must not take work meant for a
+# larger one. Ollama unloads an idle model when the next one does not fit (the lock keeps ours idle),
+# so its memory counts as reclaimable. GB needed per family, and GB a resident model gives back.
+SWAP_MIN_FREE_GB = {14: 12, 30: BIG_MODEL_MIN_FREE_GB}
+RESIDENT_GB = {7: 5, 14: 10, 30: 19}
 
 
 def free_memory_gb():
@@ -152,17 +158,92 @@ def choose(tipo, installed, loaded, has_key, has_copilot=False, free_gb=0):
         elif step == "copilot":
             if has_copilot:
                 return "copilot", "auto"
-        elif loaded:
-            match = next((m for m in loaded if family(m) == family(step)), None)
+        else:
+            size = family(step)
+            match = next((m for m in loaded if family(m) == size), None)
             if match:
                 return "ollama", match
-        else:
             match = next((m for m in installed if m == step or m.startswith(step + "-")), None)
-            if match and (family(match) != 30 or free_gb >= BIG_MODEL_MIN_FREE_GB):
+            if not match:
+                continue
+            if not loaded and (size != 30 or free_gb >= BIG_MODEL_MIN_FREE_GB):
+                return "ollama", match
+            # Only our own smaller models may be displaced; unknown models are never touched.
+            if (loaded and all(0 < family(m) < size for m in loaded)
+                    and free_gb + sum(RESIDENT_GB[family(m)] for m in loaded) >= SWAP_MIN_FREE_GB.get(size, 99)):
                 return "ollama", match
     if loaded:
         raise RouterError("Há outro modelo local carregado e nenhum modelo adequado residente; valide o acesso gratuito NVIDIA ou libere o Ollama.")
     raise RouterError("Modelo local necessário indisponível e acesso NVIDIA não configurado ou não validado.")
+
+
+WEEK_MINUTES = 10080
+ECONOMY_THRESHOLD = 90  # % of the principal's weekly limit; from here on the principal delegates more.
+
+
+def codex_weekly_percent(root=None, now=None):
+    """(used %, reset epoch) of Codex's weekly limit from its newest session logs; (None, None) when unknown.
+    Only token_count lines are parsed: conversation content is skipped, never kept or printed."""
+    root = Path(root) if root else Path.home() / ".codex/sessions"
+    now = time.time() if now is None else now
+    try:
+        days = sorted(root.glob("[0-9][0-9][0-9][0-9]/[0-9][0-9]/[0-9][0-9]"), reverse=True)[:2]
+        files = sorted((f for d in days for f in d.glob("rollout-*.jsonl")),
+                       key=lambda f: f.stat().st_mtime, reverse=True)[:5]
+    except OSError:
+        return None, None
+    for path in files:
+        try:
+            with open(path, "rb") as log:
+                log.seek(0, os.SEEK_END)
+                log.seek(max(0, log.tell() - 262144))
+                lines = log.read().decode("utf-8", "replace").splitlines()
+        except OSError:
+            continue
+        for line in reversed(lines):
+            if '"rate_limits"' not in line or '"token_count"' not in line:
+                continue
+            try:
+                limits = json.loads(line)["payload"]["rate_limits"]
+                windows = [limits.get("primary"), limits.get("secondary")]
+            except (ValueError, KeyError, TypeError, AttributeError):
+                continue
+            weekly = next((w for w in windows if isinstance(w, dict) and w.get("window_minutes") == WEEK_MINUTES), None)
+            used = weekly.get("used_percent") if weekly else None
+            if not isinstance(used, (int, float)):
+                continue
+            resets = weekly.get("resets_at")
+            if isinstance(resets, (int, float)) and resets <= now:
+                return 0.0, None  # the window already reset since this log line
+            return float(used), resets if isinstance(resets, (int, float)) else None
+    return None, None
+
+
+def economy_status(principal=None):
+    """Economy mode: the principal delegates medium code and non-sensitive analysis too.
+    Private config key "economia": true (always), false (never), "claude"/"codex" (always for that
+    principal) or absent/"auto" (Codex from ECONOMY_THRESHOLD% of its weekly limit; Claude has no local meter)."""
+    try:
+        mode = json.loads(Path(__file__).with_name("auxiliares.json").read_text()).get("economia", "auto")
+    except (OSError, ValueError, AttributeError):
+        mode = "auto"
+    status = {"principal": principal, "ativo": False, "motivo": "abaixo do limite",
+              "uso_semanal_pct": None, "reinicia": None, "limite_pct": ECONOMY_THRESHOLD}
+    if principal == "codex":
+        used, resets = codex_weekly_percent()
+        status["uso_semanal_pct"] = used
+        status["reinicia"] = time.strftime("%d/%m %H:%M", time.localtime(resets)) if resets else None
+        if used is None:
+            status["motivo"] = "uso semanal desconhecido"
+        elif used >= ECONOMY_THRESHOLD:
+            status.update(ativo=True, motivo=f"{used:.0f}% da cota semanal")
+    elif mode == "auto":
+        status["motivo"] = "sem medidor local; ative com \"economia\" na configuração privada"
+    if mode is True or (mode == principal and principal):
+        status.update(ativo=True, motivo="forçado na configuração")
+    elif mode is False:
+        status.update(ativo=False, motivo="desativado na configuração")
+    return status
 
 
 def log_usage(tipo, result):
@@ -310,7 +391,12 @@ def main(argv=None):
     parser.add_argument("--saida", help="grava a resposta neste arquivo novo e omite o texto do JSON")
     parser.add_argument("--linhas", type=int, help="exige este número de linhas não vazias")
     parser.add_argument("--padrao", help="expressão regular que cada linha não vazia precisa seguir inteira")
+    parser.add_argument("--cota", choices=("codex", "claude"),
+                        help="só mostra o modo economia deste principal (sem inferência nem leitura de stdin)")
     args = parser.parse_args(argv)
+    if args.cota:
+        print(json.dumps(economy_status(args.cota), ensure_ascii=False))
+        return 0
     prompt = sys.stdin.read(MAX_INPUT + 1)
     try:
         validate_prompt(prompt)

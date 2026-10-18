@@ -379,6 +379,27 @@ def montar_contexto(cwd: str, base: Path) -> str:
     return "\n".join(linhas)
 
 
+def linha_economia(dados) -> str:
+    """Aviso de modo economia para o principal desta sessão; vazio quando inativo ou indisponível."""
+    caminho = str(dados.get("transcript_path") or "") if isinstance(dados, dict) else ""
+    principal = "codex" if "/.codex/" in caminho else "claude" if "/.claude/" in caminho else None
+    if not principal:
+        return ""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("cerebro_auxiliares", Path(__file__).with_name("auxiliares.py"))
+        modulo = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(modulo)
+        estado = modulo.economy_status(principal)
+    except Exception:  # sem roteador ou cota ilegível: segue o modo normal
+        return ""
+    if not estado.get("ativo"):
+        return ""
+    reinicia = f"; reinicia {estado['reinicia']}" if estado.get("reinicia") else ""
+    return (f"Modo economia ({principal.capitalize()}: {estado.get('motivo')}{reinicia}): delegue também "
+            "código médio (--tipo codigo) e análise sem dados sensíveis (--tipo analise); o principal só revisa.")
+
+
 def cmd_hook(_args) -> int:
     dados = {}
     if not sys.stdin.isatty():
@@ -389,6 +410,9 @@ def cmd_hook(_args) -> int:
     cwd = dados.get("cwd") if isinstance(dados, dict) else None
     try:
         texto = montar_contexto(cwd or os.getcwd(), cofre())
+        economia = linha_economia(dados)
+        if economia:
+            texto += "\n" + economia
     except Exception as exc:  # o hook nunca deve impedir o início da sessão
         texto = (f"[Cérebro] Cofre indisponível ({exc}). Prossiga sem consulta quando for "
                  "seguro, informe essa limitação na resposta e não afirme consultas ou "

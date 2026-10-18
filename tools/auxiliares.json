@@ -1,4 +1,5 @@
 {
   "nemotron_habilitado": false,
-  "copilot_habilitado": false
+  "copilot_habilitado": false,
+  "economia": "auto"
 }

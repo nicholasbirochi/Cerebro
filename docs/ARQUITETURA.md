@@ -4,7 +4,7 @@ O usuário escolhe Claude Code ou Codex para conduzir o pedido. O principal cons
 
 ## Arquitetura de delegação
 
-O roteador concentra três caminhos: Copilot, Ollama e OpenCode/Nemotron. A escolha considera tipo de tarefa, franquia incluída atual, adequação do modelo e memória disponível. A resposta volta pelo roteador ao principal. As condições de custo e segurança prevalecem sobre a preferência por um provedor.
+O roteador concentra três caminhos: Copilot, Ollama e OpenCode/Nemotron. A escolha considera tipo de tarefa, franquia incluída atual, adequação do modelo e memória disponível. A resposta volta pelo roteador ao principal. As condições de custo e segurança prevalecem sobre a preferência por um provedor. Perto do limite semanal do principal (90%), o modo economia amplia a delegação a código médio e análise sem dados sensíveis; o principal passa a revisar mais e escrever menos.
 
 ## Três destinos implementados
 

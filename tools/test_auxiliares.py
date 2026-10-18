@@ -327,6 +327,22 @@ class LocalFirstRoutingTests(unittest.TestCase):
         self.assertEqual(a.choose("analise", self.ALL, ["qwen3-coder:30b"], True, True), ("ollama", "qwen3-coder:30b"))
         self.assertEqual(a.choose("analise", self.ALL, ["qwen2.5-coder:7b"], True, True), ("nemotron", a.REMOTE_MODEL))
 
+    def test_smaller_resident_model_gives_way_when_memory_allows(self):
+        seven, fourteen = ["qwen2.5-coder:7b"], ["qwen2.5-coder:14b"]
+        # 7B resident (5 GB back) + 9.6 GB free reaches the 12 GB a 14B needs.
+        self.assertEqual(a.choose("codigo", self.ALL, seven, True, True, free_gb=9.6), ("ollama", "qwen2.5-coder:14b"))
+        self.assertEqual(a.choose("analise", self.ALL, seven, False, True, free_gb=9.6),
+                         ("ollama", "qwen2.5-coder:14b"))
+        self.assertEqual(a.choose("analise", self.ALL, fourteen, True, True, free_gb=10), ("ollama", "qwen3-coder:30b"))
+        # Without memory the resident model keeps the work, as before.
+        self.assertEqual(a.choose("codigo", self.ALL, seven, False, False, free_gb=0), ("ollama", "qwen2.5-coder:7b"))
+
+    def test_unknown_or_larger_resident_model_is_never_displaced(self):
+        # Only our own smaller models give way: a resident 30B or an unknown model blocks loading another one.
+        for loaded in (["qwen3-coder:30b"], ["llama3:8b"]):
+            with self.subTest(loaded=loaded), self.assertRaises(a.RouterError):
+                a.choose("mecanica", self.ALL, loaded, False, False, free_gb=40)
+
     def test_unknown_memory_never_loads_30b(self):
         with patch.object(a.subprocess, "run", side_effect=OSError):
             self.assertEqual(a.free_memory_gb(), 0)
@@ -409,6 +425,67 @@ class OutputFileTests(unittest.TestCase):
                     self.assertEqual(code, 1)
                     local.assert_not_called()
             self.assertEqual(target.read_text(), "original")
+
+
+class EconomyModeTests(unittest.TestCase):
+    """Weekly quota of the principal: read from synthetic Codex logs, never the real ones."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        location = patch.object(a, "__file__", str(self.root / "auxiliares.py"))
+        location.start(); self.addCleanup(location.stop)
+
+    def log(self, *events, day="2026/10/18", name="rollout-a.jsonl"):
+        folder = self.root / "sessions" / day
+        folder.mkdir(parents=True, exist_ok=True)
+        (folder / name).write_text("".join(json.dumps(e) + "\n" for e in events))
+
+    @staticmethod
+    def tokens(weekly, resets=2_000_000_000):
+        return {"type": "event_msg", "payload": {"type": "token_count", "rate_limits": {
+            "primary": {"window_minutes": 300, "used_percent": 99.0, "resets_at": resets},
+            "secondary": {"window_minutes": a.WEEK_MINUTES, "used_percent": weekly, "resets_at": resets}}}}
+
+    def test_reads_weekly_window_from_newest_token_count(self):
+        conversa = {"type": "response_item", "payload": {"text": "rate_limits token_count segredo"}}
+        self.log(self.tokens(40), self.tokens(92), conversa)
+        self.assertEqual(a.codex_weekly_percent(self.root / "sessions", now=1), (92.0, 2_000_000_000))
+
+    def test_reset_window_and_missing_logs(self):
+        self.log(self.tokens(95, resets=100))
+        self.assertEqual(a.codex_weekly_percent(self.root / "sessions", now=200), (0.0, None))
+        self.assertEqual(a.codex_weekly_percent(self.root / "nada"), (None, None))
+        self.log({"type": "event_msg", "payload": {"type": "token_count", "rate_limits": None}}, name="rollout-b.jsonl",
+                 day="2026/10/19")
+        self.assertEqual(a.codex_weekly_percent(self.root / "sessions", now=200), (0.0, None))
+
+    def status(self, principal, used, config=None):
+        if config is not None:
+            (self.root / "auxiliares.json").write_text(json.dumps(config))
+        with patch.object(a, "codex_weekly_percent", return_value=(used, None)):
+            return a.economy_status(principal)
+
+    def test_codex_turns_on_at_threshold(self):
+        self.assertFalse(self.status("codex", 89.0)["ativo"])
+        self.assertTrue(self.status("codex", 90.0)["ativo"])
+        self.assertEqual(self.status("codex", None)["motivo"], "uso semanal desconhecido")
+
+    def test_private_config_forces_or_disables(self):
+        self.assertFalse(self.status("claude", None)["ativo"])
+        self.assertTrue(self.status("claude", None, {"economia": "claude"})["ativo"])
+        self.assertFalse(self.status("codex", 10.0, {"economia": "claude"})["ativo"])
+        self.assertTrue(self.status("codex", 10.0, {"economia": True})["ativo"])
+        self.assertFalse(self.status("codex", 99.0, {"economia": False})["ativo"])
+
+    def test_cota_flag_prints_status_without_inference(self):
+        out = io.StringIO()
+        with patch.object(a, "codex_weekly_percent", return_value=(91.0, None)), \
+             patch.object(a, "local_inventory") as inventory, contextlib.redirect_stdout(out):
+            self.assertEqual(a.main(["--cota", "codex"]), 0)
+        inventory.assert_not_called()
+        self.assertTrue(json.loads(out.getvalue())["ativo"])
 
 
 if __name__ == "__main__":

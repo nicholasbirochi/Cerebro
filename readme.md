@@ -152,7 +152,9 @@ A busca ignora acentos e caixa, trata termos de até três caracteres como palav
 
 ## Auxiliares
 
-`tools/auxiliares.py` prefere Qwen 7B para tarefas mecânicas, Copilot elegível para código e Nemotron elegível para análise; sem esses acessos, considera os modelos locais adequados já residentes, incluindo Qwen 14B para código. O 30B não é carregado automaticamente. O Ollama e os modelos precisam estar instalados pelo usuário; o script não baixa modelos.
+`tools/auxiliares.py` tenta primeiro os modelos locais, que são gratuitos e privados: Qwen 7B para tarefas mecânicas, Qwen 14B para código e Qwen3 30B para análise. Copilot e Nemotron elegíveis entram quando o modelo local adequado não cabe ou não está instalado. O 30B só é carregado com pelo menos 20 GB livres. Um modelo menor que ficou residente, como o 7B de uma tarefa mecânica, cede lugar ao maior quando a memória livre somada à que ele devolve basta (12 GB para o 14B). Modelos desconhecidos nunca são descarregados. O Ollama e os modelos precisam estar instalados pelo usuário; o script não baixa modelos.
+
+**Modo economia.** Quando o principal chega a 90% da cota semanal, o hook de início acrescenta uma linha pedindo que ele delegue também código médio (`--tipo codigo`) e análise sem dados sensíveis (`--tipo analise`), ficando só com a revisão. No Codex, o uso vem do campo `rate_limits` dos registros locais da sessão; o conteúdo das conversas não é lido. O Claude não tem medidor local: ative com `"economia": "claude"` em `tools/auxiliares.json`. Também valem `true` (sempre), `false` (nunca) e `"auto"` (padrão). Para ver o estado sem inferência: `python3 tools/auxiliares.py --cota codex`.
 
 Na máquina apresentada, o Nemotron respondeu via OpenCode em 13/10/2026: 56 tokens de entrada, 2 de saída e cerca de 19 segundos. Isso confirma a chamada nessa data; conexão, credencial e cota continuam necessárias.
 
