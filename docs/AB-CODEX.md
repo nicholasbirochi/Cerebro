@@ -80,7 +80,7 @@ Comparações pareadas (mesma tarefa e rodada), com razão geométrica, IC 95% p
 
 Convenções: o atual segue mais regras que o cru (29 × 18 em 36, p = 0,031), e o hook curto segue ainda mais (35 × 29, p = 0,031), com 8 das 9 execuções aceitas já na 1ª tentativa.
 
-**Melhor cenário: hook curto + validação proporcional.** O hook curto custa perto do cru (×1,09) e segue quase todas as convenções; o protocolo inteiro no início da sessão é o que encarece o atual. No Pontos, o excesso vinha de rodar toda a validação a cada passo: pedir testes proporcionais ao risco corta metade dos tokens pagos sem perder convenções. O Pontos continua mais caro que o cru (×1,24) porque segue regras que o cru ignora.
+**Melhor cenário: hook curto + validação proporcional.** O hook curto custa perto do cru (×1,09) e segue quase todas as convenções; o protocolo inteiro no início da sessão é o que encarece o atual. No Pontos, o excesso vinha de rodar toda a validação a cada passo: pedir testes proporcionais ao risco corta metade dos tokens pagos sem perder convenções. O Pontos continua mais caro que o cru (×1,24) porque segue regras que o cru ignora. **Aplicado em 18/10/2026:** o hook de início agora injeta só esse resumo (cerca de 1,9 mil caracteres, contra ~5 mil só da seção Essencial). O texto vem da seção `## Resumo do hook` do Protocolo, quando existe, ou do padrão `RESUMO` em [tools/cerebro.py](../tools/cerebro.py).
 
 ## Limites
 

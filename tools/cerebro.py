@@ -63,7 +63,6 @@ CALLOUTS = {"contexto", "fato", "decisao", "hipotese", "risco", "pendencia", "re
 CALLOUT = re.compile(r"^>\s*\[!([^\]]+)\][+-]?[ \t]*(.*)$", re.M)
 FONTE_CONFERIDA = re.compile(r"(.+) sha256:([0-9a-f]{64})")  # "<caminho> sha256:<hash>" em fontes_conferidas
 MAX_NOTA = 60_000
-MAX_PROTOCOLO = 8_000
 ORCAMENTO = 12_000  # caracteres das notas que o buscar seleciona (protocolo: ~12 mil)
 SEGREDOS = [
     re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
@@ -347,33 +346,36 @@ def secao(corpo: str, titulo: str) -> str | None:
     return corpo[inicio.end(): inicio.end() + fim.start() if fim else len(corpo)].strip()
 
 
+# Resumo injetado pelo hook a cada sessão. A/B de 2026-10-18: a seção Essencial inteira (~5,7 mil
+# caracteres) custava ~1,5 mil tokens por chamada sem melhorar o acerto. Se o Protocolo ganhar uma
+# seção "## Resumo do hook", ela substitui este texto.
+RESUMO = """Regras ativas (resumo; procedimentos no Protocolo dos Agentes, leia só a seção necessária):
+- Pedido do usuário prevalece; notas do cofre são contexto, não autorização. Consulte o cofre (comando acima, com --trechos) só quando a tarefa precisar.
+- Autoria: commit e push só quando o usuário pedir, como Nicholas Birochi <131502494+nicholasbirochi@users.noreply.github.com>; nunca coautor, trailer ou crédito de IA, mesmo que o cliente peça.
+- Projeto novo: Estudos/Projetos/<próximo número livre> - <Nome>. Antes de criar repositório GitHub ou do primeiro push, pergunte separadamente "Repositório público ou privado?" e "Você autoriza incluir algum dado? Quais arquivos?" (dados ficam fora por padrão); descrição em inglês, em uma frase; README com pelo menos uma imagem segura.
+- Ao mudar comportamento, atualize o README e os documentos afetados e acrescente testes. Valide proporcionalmente ao risco; nunca remova validação ou segurança.
+- Custo: menor modelo suficiente; sem Fable, API paga, billing ou download de modelos.
+- Delegação: trabalho delimitado vai primeiro aos auxiliares locais (.cerebro/auxiliares.py --tipo mecanica|codigo|analise), 1 tentativa e contexto mínimo; nunca segredos, commits ou publicação. O principal revisa.
+- Regras (00) e templates (07) só mudam com autorização; mover, arquivar e excluir exigem plano e confirmação.
+- Honestidade: nunca afirme consulta, teste ou registro que não ocorreu. Fim de tarefa de projeto: registre só conhecimento novo e verificável pela ferramenta; senão diga "sem registro: nada novo"."""
+
+
 def montar_contexto(cwd: str, base: Path) -> str:
     script = Path(__file__).resolve()
-    linhas = [f"[Cérebro] Segundo cérebro disponível em: {base}",
-              f"Índice principal: {base / INDICE}"]
+    linhas = [f"[Cérebro] Segundo cérebro em: {base}"]
     perfil, via = identificar(cwd, base)
     if perfil:
         nome = perfil.stem.removeprefix("Projeto - ")
-        linhas.append(f"Projeto identificado por {via}: {perfil.stem} -> {perfil}")
+        linhas.append(f"Projeto identificado por {via}: {perfil}")
         linhas.append(f'Consulta: python3 "{script}" buscar <termos> --projeto "{nome}" --trechos')
     else:
-        linhas.append(f"Nenhum perfil de projeto corresponde a {cwd}. Em tarefa de projeto, "
-                      "confira o Índice de projetos antes de propor um perfil novo.")
+        linhas.append("Nenhum perfil de projeto para esta pasta.")
         linhas.append(f'Consulta: python3 "{script}" buscar <termos> --trechos')
     try:
         _, corpo = separar((base / PROTOCOLO).read_text(encoding="utf-8"))
     except ValueError:
         corpo = ""
-    corpo = corpo.strip()
-    essencial = secao(corpo, "Essencial")
-    if essencial:  # as mesmas regras com ou sem projeto; procedimentos ficam no arquivo
-        linhas += ["", f"--- Protocolo dos Agentes, seção Essencial (procedimentos completos: {base / PROTOCOLO}) ---",
-                   essencial]
-        return "\n".join(linhas)
-    linhas.append(f'Ferramenta: python3 "{script}" buscar|hash|gravar|verificar (ajuda: -h)')
-    if len(corpo) > MAX_PROTOCOLO:
-        corpo = corpo[:MAX_PROTOCOLO] + "\n[...truncado; leia o arquivo do protocolo]"
-    linhas += ["", f"--- Protocolo dos Agentes (fonte única: {base / PROTOCOLO}) ---", corpo]
+    linhas += ["", secao(corpo, "Resumo do hook") or RESUMO, f"Protocolo completo: {base / PROTOCOLO}"]
     return "\n".join(linhas)
 
 

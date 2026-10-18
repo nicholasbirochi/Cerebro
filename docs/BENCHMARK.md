@@ -11,23 +11,25 @@ Executado em 17/10/2026 em um Apple M5 com 24 GB de RAM, macOS e Python 3.14.7. 
 | Escala | Situação |
 |---|---|
 | 1, 10, 100, 1.000, 10.000 e 100.000 notas | **Medido.** Arquivos reais em disco, 8 consultas pareadas por escala, 48 comparações e 96 execuções no total. |
-| 1.000.000 de notas | **Não medido por completo; caracteres e tokens aparecem como projeção.** O acervo foi gerado em disco (2,83 GB). Uma segunda tentativa, em 17–18/10/2026, concluiu 4 das 8 consultas nas duas versões e parou por limite de 8 h na 5ª. |
+| 1.000.000 de notas | **Medido em parte; o resto é estimativa ou projeção.** O acervo foi gerado em disco (2,83 GB). Em 17–18/10/2026, as consultas 1 a 4 foram medidas nas duas versões; a 5ª da versão anterior passou do limite de 8 h. O tempo das 8 buscas é estimado a partir dessas medidas; caracteres e tokens são projeção. |
 
-Nenhuma simulação ilustrativa foi usada. Em tabelas e gráficos, a projeção aparece em itálico ou com bolinha vazada e linha tracejada, sempre com "≈".
+Nenhuma simulação ilustrativa foi usada. Em tabelas e gráficos, a projeção e a estimativa aparecem em itálico ou com bolinha vazada e linha tracejada, sempre com "≈".
 
-### Por que 1 milhão não foi medido
+### Por que 1 milhão não foi medido por completo
 
-O custo cresceu mais que o tamanho do acervo. De 10.000 para 100.000 notas, dez vezes mais notas, o tempo das 8 buscas cresceu **×45,2 na versão anterior** e ×15,9 na atual. Repetido até 1 milhão, isso dá cerca de **7,7 h** só para a versão anterior. Uma medição dessas ocuparia o Mac por uma noite inteira, para confirmar um resultado de caracteres que a estrutura do teste já limita.
+O custo cresceu mais que o tamanho do acervo. De 10.000 para 100.000 notas, dez vezes mais notas, o tempo das 8 buscas cresceu **×45,2 na versão anterior** e ×15,9 na atual. A primeira projeção repetia esse fator até 1 milhão e dava ≈ 7,7 h para a versão anterior. A medição parcial mostrou um custo cerca de 3,5 vezes maior: **≈ 27 h para as 8 buscas da versão anterior**. Terminar a medição ocuparia o Mac por mais de um dia para confirmar um resultado de caracteres que a estrutura do teste já limita.
 
 A interrupção também produziu um dado real. A busca `roteamento` da versão anterior levou 55,9 s em 100.000 notas. Em 1 milhão, ela passou de **22,3 min** (20,3 min de CPU) sem terminar.
 
-**Segunda tentativa (17–18/10/2026).** Com limite de 8 h por busca, a execução gerou o acervo e concluiu as consultas 1 a 4 nas duas versões em cerca de 10,8 h. A consulta 4 (`publicacao`) da versão anterior levou **3,2 h** (11.386,6 s), com pico de **1,79 GB**. A consulta 5 (`roteamento validacao`) da versão anterior passou de **8 h** sem terminar. Só a versão anterior somou, então, mais de 11,2 h em duas das oito buscas: **a projeção de ≈ 7,7 h para as 8 buscas subestimou o custo real**. O progresso só é gravado por escala completa, por isso os demais tempos e as saídas dessas quatro consultas não foram guardados.
+**Segunda tentativa (17–18/10/2026).** Com limite de 8 h por busca, a execução gerou o acervo e concluiu as consultas 1 a 4 nas duas versões em cerca de 10,8 h. Tempos medidos, versão anterior → atual: `roteamento` 6.665,5 s → 268,5 s; `validacao` 6.155,0 s → 264,2 s; `interface` 9.895,7 s → 477,7 s; `publicacao` 11.386,6 s → 476,1 s. Somam **9,5 h → 24,8 min**, com pico de **1,79 GB** por busca nas duas versões. A consulta 5 (`roteamento validacao`) da versão anterior passou de **8 h** sem terminar, e a execução parou ali. Os tempos vieram do log da execução; o arquivo de progresso só grava escalas completas, por isso as saídas dessas quatro consultas não foram guardadas.
 
-### Como a projeção foi feita
+**Estimativa para as 8 buscas: ≈ 27 h (26–31 h) na versão anterior e ≈ 50 min (42–57 min) na atual**, cerca de 33 vezes mais rápida. A versão atual levaria ≈ 6 min por busca; a anterior, ≈ 3,4 h. O método está abaixo e os números, em `projecao_1000000` no JSON.
+
+### Como a projeção e a estimativa foram feitas
 
 - **Caracteres e tokens.** As saídas são limitadas a 5 notas e 12.000 caracteres por consulta. De 10.000 para 100.000 notas, elas mudaram só nos dígitos das contagens de omitidas: +14 caracteres por versão nas 8 consultas. A projeção repete esse acréscimo de 100.000 para 1 milhão: ≈ 83.900 → ≈ 40.607 caracteres, ≈ 51,6%.
-- **Tempo.** Lei de potência por versão: o fator observado de 10.000 para 100.000 notas (×45,2 e ×15,9) é aplicado de novo. A projeção é ≈ 7,7 h antes e ≈ 42 min na versão atual, para as 8 buscas. **A medição parcial refutou a projeção da versão anterior** (mais de 11,2 h em só duas buscas); a da versão atual não foi conferida.
-- **Memória.** Extrapolação linear do pico entre 10.000 e 100.000 notas: ≈ 3,4 GB por busca.
+- **Tempo, estimado com a medição parcial.** As consultas 1 a 4 foram medidas. Para as 5 a 8, o tempo de cada uma em 100.000 notas é multiplicado pelo fator de 100.000 → 1 milhão observado nas consultas 1 a 4 da mesma versão: ×110 a ×203 na anterior (mediana ×149) e ×13,4 a ×24,1 na atual (mediana ×18,9). O mínimo e o máximo dão o intervalo; a mediana, o valor central. Na versão anterior, as consultas 5 e 6 ficam no mínimo nas 8 h medidas; as 7 e 8, que em 100.000 notas levaram o mesmo tempo nas duas versões, usam como piso o fator da atual. Resultado: **≈ 27 h (26–31 h) na versão anterior e ≈ 50 min (42–57 min) na atual**. A primeira projeção (≈ 7,7 h e ≈ 42 min) só repetia o fator de 10.000 → 100.000 e **subestimou a versão anterior**; a da versão atual ficou no limite inferior do novo intervalo.
+- **Memória, medida.** Pico de 1,79 GB por busca nas 8 execuções concluídas, nas duas versões. A extrapolação linear inicial (≈ 3,4 GB) superestimou.
 - **Tamanho do acervo.** Não é projeção: o acervo foi gerado, e seu tamanho exato foi recalculado pelo gerador determinístico.
 
 Uma projeção não substitui a medição. Uma escala maior pode trazer efeitos de cache e memória que estes fatores não capturam.
@@ -39,7 +41,7 @@ Em um clone Git que contenha a revisão de referência:
 ```bash
 python3 tools/benchmark_busca.py --ampliado                          # 1 a 10.000 notas, cerca de 30 s
 python3 tools/benchmark_busca.py --escalas 1 10 100 1000 10000 100000 --parcial progresso.json   # esta execução
-python3 tools/benchmark_busca.py --completo --parcial progresso.json  # inclui 1 milhão: ~4 GB e cerca de 8 h
+python3 tools/benchmark_busca.py --completo --parcial progresso.json  # inclui 1 milhão: ~4 GB e cerca de 29 h; use --espera 43200
 python3 tools/benchmark_busca.py --escalas 40 1000 10000              # o ensaio anterior, de três escalas
 ```
 
@@ -61,7 +63,7 @@ Cuidados com as escalas grandes:
 | 1.000 | 1.001 | 2.690.974 | 2.819.929 | 2,8 MB | Medido |
 | 10.000 | 10.001 | 26.918.974 | 28.208.929 | 28,2 MB | Medido |
 | 100.000 | 100.001 | 269.198.974 | 282.098.929 | 282,1 MB | Medido |
-| 1.000.000 | 1.000.001 | 2.699.198.974 | 2.828.198.929 | 2,83 GB | Gerado em disco; busca interrompida |
+| 1.000.000 | 1.000.001 | 2.699.198.974 | 2.828.198.929 | 2,83 GB | Gerado em disco; 4 de 8 buscas medidas |
 
 O protocolo mínimo participa das contagens de arquivos e caracteres, mas não das notas de conteúdo. O acervo é contado uma vez, sem multiplicar pelas consultas, e não representa conteúdo enviado a uma IA. Em disco, 1 milhão de notas ocupou cerca de 3,8 GB, porque cada arquivo pequeno usa um bloco inteiro.
 
@@ -113,11 +115,11 @@ Como ler esses números:
 | 1.000 notas | 0,1 s | 1,3 s | 1,4 s | 0,17 s | 1,3 s → 1,3 s | 33 MB |
 | 10.000 notas | 0,8 s | 13,6 s | 10,1 s | 1,26 s | 13,5 s → 10,0 s | 64 MB |
 | 100.000 notas | 15,8 s | 10 min | 3 min | 20,02 s | 9 min → 101,3 s | 374 MB |
-| *1.000.000 notas, parcial* | gerado; tempo não registrado | **> 11,2 h** em 2 buscas, medido | *≈ 42 min*, projeção | *≈ 5,3 min* | — | 1,79 GB na busca 4 antes, medido |
+| *1.000.000 notas, parcial* | gerado; tempo não registrado | **9,5 h** em 4 buscas, medido; *≈ 27 h* nas 8, estimativa | **24,8 min** em 4 buscas, medido; *≈ 50 min* nas 8, estimativa | *≈ 6,2 min* | — | 1,79 GB, medido |
 
 - **A redução de contexto não custou tempo.** Somando as escalas medidas, foram 11 min antes e 3 min na versão atual. Em 100.000 notas, a busca atual foi **3,8× mais rápida**: 10 min contra 3 min nas 8 consultas. Até 1.000 notas, as diferenças ficam abaixo de um décimo de segundo por busca e se confundem com a variação entre execuções.
 - **O crescimento é diferente nas duas versões.** De 10.000 para 100.000 notas, dez vezes mais notas, a atual cresceu ×15,9 e a anterior ×45,2. As duas leem todas as notas a cada busca, sem índice. A causa do crescimento mais rápido da anterior não foi investigada.
-- **O limite prático é o tempo, não o contexto.** O texto devolvido fica estável, mas uma busca atual de 20 s em 100.000 notas, ou de ≈ 5 min projetados em 1 milhão, não serve para uso interativo. Acervos dessa ordem pediriam um índice persistente, que este benchmark não avalia.
+- **O limite prático é o tempo, não o contexto.** O texto devolvido fica estável, mas uma busca atual de 20 s em 100.000 notas, ou de 4,4 a 8 min medidos em 1 milhão, não serve para uso interativo. Acervos dessa ordem pediriam um índice persistente, que este benchmark não avalia.
 - **Leitura do disco.** Em 100.000 notas, o tempo de parede da versão atual (3 min) supera o de CPU (101,3 s). A diferença é a leitura dos 282 MB de arquivos.
 - Os tempos incluem a inicialização do Python e vêm de uma passagem por caso, sem controle de cache nem repetições estatísticas. O pico de memória é o RSS máximo de cada processo de busca.
 
@@ -156,7 +158,7 @@ Ambas as versões recebem `--trechos --max 5 --orcamento 12000`. As notas têm t
 ## Limites
 
 - Os acervos são inteiramente sintéticos e regulares. Acervos reais têm notas e distribuições de relevância diferentes.
-- Em 1 milhão de notas, caracteres, tokens e a equivalência são projeção ou não verificados. Foram observados o tamanho do acervo, o tempo e a memória da busca 4 da versão anterior e o limite inferior de 8 h da busca 5.
+- Em 1 milhão de notas, caracteres, tokens e a equivalência são projeção ou não verificados, e o tempo das consultas 5 a 8 é estimativa. Foram medidos o tamanho do acervo, o tempo e a memória das consultas 1 a 4 nas duas versões e o limite inferior de 8 h da consulta 5 da versão anterior.
 - Caracteres Unicode, bytes UTF-8 e tokens são unidades distintas. A contagem de tokens usa `o200k_base`, não o tokenizador do Claude.
 - O tamanho do acervo consultado não é o volume enviado a um modelo.
 - A equivalência compara a seleção de contexto nestes casos e não avalia inferências nem a qualidade geral das IAs.

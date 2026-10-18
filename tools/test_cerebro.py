@@ -68,7 +68,7 @@ class CofreSintetico(unittest.TestCase):
         texto = self.contexto_do_hook(cwd)
         self.assertIn("Projeto - Sintetico", texto)
         self.assertIn("por caminho", texto)
-        self.assertIn("PROTOCOLO-SINTETICO", texto)
+        self.assertIn(cerebro.RESUMO, texto)
 
     def test_hook_identifica_por_remoto_git(self):
         repo = self.tmp / "clone"
@@ -301,17 +301,27 @@ class CofreSintetico(unittest.TestCase):
         self.assertIn("Parte um (", r.stdout)
         self.assertIn("Parte dois (", r.stdout)
 
-    def test_hook_injeta_so_a_secao_essencial_com_e_sem_projeto(self):
+    def test_hook_injeta_resumo_curto_com_e_sem_projeto(self):
         (self.base / cerebro.PROTOCOLO).write_text(nota("regra", extra="autorizacao: teste\n", corpo=(
-            "# Protocolo\n\n## Essencial\nREGRA-DE-CUSTO-ESSENCIAL\n\n## 1. Procedimento\nSO-NO-ARQUIVO\n")),
+            "# Protocolo\n\n## Essencial\nREGRA-DA-ESSENCIAL\n\n## 1. Procedimento\nSO-NO-ARQUIVO\n")),
             encoding="utf-8")
         for cwd in (str(self.projeto), str(self.fora)):  # projeto com perfil e pasta sem perfil
             with self.subTest(cwd=cwd):
                 texto = self.contexto_do_hook(cwd)
-                self.assertIn("REGRA-DE-CUSTO-ESSENCIAL", texto)
+                self.assertIn(cerebro.RESUMO, texto)
+                self.assertNotIn("REGRA-DA-ESSENCIAL", texto)
                 self.assertNotIn("SO-NO-ARQUIVO", texto)
                 self.assertIn("--trechos", texto)
+                self.assertLess(len(texto), 2_500)
         self.assertIn('--projeto "Sintetico"', self.contexto_do_hook(str(self.projeto)))
+
+    def test_secao_resumo_do_hook_no_protocolo_substitui_o_padrao(self):
+        (self.base / cerebro.PROTOCOLO).write_text(nota("regra", extra="autorizacao: teste\n", corpo=(
+            "# Protocolo\n\n## Resumo do hook\nRESUMO-DO-COFRE\n\n## Essencial\nLONGO\n")), encoding="utf-8")
+        texto = self.contexto_do_hook(str(self.fora))
+        self.assertIn("RESUMO-DO-COFRE", texto)
+        self.assertNotIn(cerebro.RESUMO, texto)
+        self.assertNotIn("LONGO", texto)
 
     def test_buscar_trechos_mostra_linhas_e_secoes(self):
         pasta = self.base / "05 - Padrões e Preferências/Aprendizados"
