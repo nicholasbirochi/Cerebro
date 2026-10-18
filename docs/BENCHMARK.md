@@ -11,7 +11,7 @@ Executado em 17/10/2026 em um Apple M5 com 24 GB de RAM, macOS e Python 3.14.7. 
 | Escala | Situação |
 |---|---|
 | 1, 10, 100, 1.000, 10.000 e 100.000 notas | **Medido.** Arquivos reais em disco, 8 consultas pareadas por escala, 48 comparações e 96 execuções no total. |
-| 1.000.000 de notas | **Não medido; aparece como projeção.** O acervo foi gerado em disco (2,83 GB), mas a primeira busca da versão anterior foi interrompida após 22,3 min sem terminar. |
+| 1.000.000 de notas | **Não medido por completo; caracteres e tokens aparecem como projeção.** O acervo foi gerado em disco (2,83 GB). Uma segunda tentativa, em 17–18/10/2026, concluiu 4 das 8 consultas nas duas versões e parou por limite de 8 h na 5ª. |
 
 Nenhuma simulação ilustrativa foi usada. Em tabelas e gráficos, a projeção aparece em itálico ou com bolinha vazada e linha tracejada, sempre com "≈".
 
@@ -19,12 +19,14 @@ Nenhuma simulação ilustrativa foi usada. Em tabelas e gráficos, a projeção 
 
 O custo cresceu mais que o tamanho do acervo. De 10.000 para 100.000 notas, dez vezes mais notas, o tempo das 8 buscas cresceu **×45,2 na versão anterior** e ×15,9 na atual. Repetido até 1 milhão, isso dá cerca de **7,7 h** só para a versão anterior. Uma medição dessas ocuparia o Mac por uma noite inteira, para confirmar um resultado de caracteres que a estrutura do teste já limita.
 
-A interrupção também produziu um dado real. A busca `roteamento` da versão anterior levou 55,9 s em 100.000 notas. Em 1 milhão, ela passou de **22,3 min** (20,3 min de CPU) sem terminar. Isso é um limite inferior medido, compatível com os ~31 min projetados para essa consulta.
+A interrupção também produziu um dado real. A busca `roteamento` da versão anterior levou 55,9 s em 100.000 notas. Em 1 milhão, ela passou de **22,3 min** (20,3 min de CPU) sem terminar.
+
+**Segunda tentativa (17–18/10/2026).** Com limite de 8 h por busca, a execução gerou o acervo e concluiu as consultas 1 a 4 nas duas versões em cerca de 10,8 h. A consulta 4 (`publicacao`) da versão anterior levou **3,2 h** (11.386,6 s), com pico de **1,79 GB**. A consulta 5 (`roteamento validacao`) da versão anterior passou de **8 h** sem terminar. Só a versão anterior somou, então, mais de 11,2 h em duas das oito buscas: **a projeção de ≈ 7,7 h para as 8 buscas subestimou o custo real**. O progresso só é gravado por escala completa, por isso os demais tempos e as saídas dessas quatro consultas não foram guardados.
 
 ### Como a projeção foi feita
 
 - **Caracteres e tokens.** As saídas são limitadas a 5 notas e 12.000 caracteres por consulta. De 10.000 para 100.000 notas, elas mudaram só nos dígitos das contagens de omitidas: +14 caracteres por versão nas 8 consultas. A projeção repete esse acréscimo de 100.000 para 1 milhão: ≈ 83.900 → ≈ 40.607 caracteres, ≈ 51,6%.
-- **Tempo.** Lei de potência por versão: o fator observado de 10.000 para 100.000 notas (×45,2 e ×15,9) é aplicado de novo. A projeção é ≈ 7,7 h antes e ≈ 42 min na versão atual, para as 8 buscas.
+- **Tempo.** Lei de potência por versão: o fator observado de 10.000 para 100.000 notas (×45,2 e ×15,9) é aplicado de novo. A projeção é ≈ 7,7 h antes e ≈ 42 min na versão atual, para as 8 buscas. **A medição parcial refutou a projeção da versão anterior** (mais de 11,2 h em só duas buscas); a da versão atual não foi conferida.
 - **Memória.** Extrapolação linear do pico entre 10.000 e 100.000 notas: ≈ 3,4 GB por busca.
 - **Tamanho do acervo.** Não é projeção: o acervo foi gerado, e seu tamanho exato foi recalculado pelo gerador determinístico.
 
@@ -111,7 +113,7 @@ Como ler esses números:
 | 1.000 notas | 0,1 s | 1,3 s | 1,4 s | 0,17 s | 1,3 s → 1,3 s | 33 MB |
 | 10.000 notas | 0,8 s | 13,6 s | 10,1 s | 1,26 s | 13,5 s → 10,0 s | 64 MB |
 | 100.000 notas | 15,8 s | 10 min | 3 min | 20,02 s | 9 min → 101,3 s | 374 MB |
-| *1.000.000 notas, projeção* | gerado; tempo não registrado | *≈ 7,7 h* | *≈ 42 min* | *≈ 5,3 min* | — | *≈ 3,4 GB* |
+| *1.000.000 notas, parcial* | gerado; tempo não registrado | **> 11,2 h** em 2 buscas, medido | *≈ 42 min*, projeção | *≈ 5,3 min* | — | 1,79 GB na busca 4 antes, medido |
 
 - **A redução de contexto não custou tempo.** Somando as escalas medidas, foram 11 min antes e 3 min na versão atual. Em 100.000 notas, a busca atual foi **3,8× mais rápida**: 10 min contra 3 min nas 8 consultas. Até 1.000 notas, as diferenças ficam abaixo de um décimo de segundo por busca e se confundem com a variação entre execuções.
 - **O crescimento é diferente nas duas versões.** De 10.000 para 100.000 notas, dez vezes mais notas, a atual cresceu ×15,9 e a anterior ×45,2. As duas leem todas as notas a cada busca, sem índice. A causa do crescimento mais rápido da anterior não foi investigada.
@@ -154,7 +156,7 @@ Ambas as versões recebem `--trechos --max 5 --orcamento 12000`. As notas têm t
 ## Limites
 
 - Os acervos são inteiramente sintéticos e regulares. Acervos reais têm notas e distribuições de relevância diferentes.
-- 1 milhão de notas é projeção. Só o tamanho do acervo e o limite inferior de tempo da primeira busca foram observados.
+- Em 1 milhão de notas, caracteres, tokens e a equivalência são projeção ou não verificados. Foram observados o tamanho do acervo, o tempo e a memória da busca 4 da versão anterior e o limite inferior de 8 h da busca 5.
 - Caracteres Unicode, bytes UTF-8 e tokens são unidades distintas. A contagem de tokens usa `o200k_base`, não o tokenizador do Claude.
 - O tamanho do acervo consultado não é o volume enviado a um modelo.
 - A equivalência compara a seleção de contexto nestes casos e não avalia inferências nem a qualidade geral das IAs.

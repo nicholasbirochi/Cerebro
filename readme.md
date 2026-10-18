@@ -22,6 +22,12 @@ Mesmo modelo, mesma pasta e mesmas perguntas. O Codex **cru** roda sem configura
 
 Nas perguntas que dependem do seu contexto, o acerto foi de **0 para 120 em 120** (6 rodadas, 150 respostas por lado), sem regressão nas tarefas da pasta. O completo lê mais por sessão, mas gasta **49% menos tokens por resposta certa**. Delegar tarefas pequenas ao Qwen 7B local ainda custa mais ao principal do que economiza; o método, os números e os próximos ajustes estão em [docs/AB-CODEX.md](docs/AB-CODEX.md).
 
+### Código: tokens pagos até a resposta ser aceita
+
+[![One pager do A/B de código: hook curto com 23% menos tokens pagos que o atual e 35/36 convenções na 1ª tentativa](media/ab-codigo.png)](media/ab-codigo.png)
+
+Em três tarefas de código repetidas até serem aceitas, o hook com o protocolo inteiro custou ×1,42 os tokens pagos (entrada fora do cache + saída) do Codex cru. Um **hook curto**, só com as regras que mudam o comportamento, ficou em ×1,09 do cru e **23% abaixo do atual**. Ele também seguiu **35 de 36 convenções** na 1ª tentativa, contra 29 do atual e 18 do cru. No Pontos, pedir **validação proporcional ao risco** em vez da suíte inteira a cada passo cortou metade dos tokens pagos. O melhor cenário medido é **hook curto + validação proporcional**; n = 3 por tarefa, com intervalos e limites em [docs/AB-CODEX.md](docs/AB-CODEX.md#código-até-acertar-qual-contexto-custa-menos).
+
 ## Como os testes foram feitos
 
 Os A/B comparam o mesmo Codex (`gpt-5.6-sol`, esforço médio) em duas condições, e só o ambiente em volta dele muda:
@@ -65,7 +71,7 @@ A checagem de testes novos no CNPJ entrou depois de uma rodada de validação, q
 
 [Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
 
-Análise com dados **inteiramente sintéticos** em sete escalas. **Seis foram medidas:** 1, 10, 100, 1.000, 10.000 e 100.000 notas de conteúdo, até 282,1 MB, com oito consultas distintas por escala: **48 comparações e 96 execuções**. **1 milhão de notas aparece só como projeção.** O acervo de 2,83 GB foi gerado em disco, mas a primeira busca da versão anterior passou de 22 minutos sem terminar, e a medição completa levaria cerca de 8 horas.
+Análise com dados **inteiramente sintéticos** em sete escalas. **Seis foram medidas:** 1, 10, 100, 1.000, 10.000 e 100.000 notas de conteúdo, até 282,1 MB, com oito consultas distintas por escala: **48 comparações e 96 execuções**. **1 milhão de notas aparece só como projeção.** O acervo de 2,83 GB foi gerado em disco. Uma tentativa de medição concluiu 4 das 8 consultas e parou por limite: na versão anterior, uma busca levou 3,2 h e a seguinte passou de 8 h. A projeção de tempo da versão anterior (≈ 7,7 h) ficou abaixo do real.
 
 | Escala | Texto retornado antes | Agora | Redução em caracteres | Redução em tokens* | 8 buscas, antes → agora |
 |---|---:|---:|---:|---:|---:|
@@ -75,7 +81,7 @@ Análise com dados **inteiramente sintéticos** em sete escalas. **Seis foram me
 | 1.000 notas | 82.546 | 40.565 | 50,9% | 57,5% | 1,3 s → 1,4 s |
 | 10.000 notas | 83.872 | 40.579 | 51,6% | 58,2% | 13,6 s → 10,1 s |
 | 100.000 notas | 83.886 | 40.593 | 51,6% | 58,2% | 10 min → 3 min |
-| *1.000.000 notas, projeção* | *≈ 83.900* | *≈ 40.607* | *≈ 51,6%* | *≈ 58,2%* | *≈ 7,7 h → 42 min* |
+| *1.000.000 notas, projeção* | *≈ 83.900* | *≈ 40.607* | *≈ 51,6%* | *≈ 58,2%* | *> 11,2 h → ≈ 42 min* |
 | **Total medido, 48 consultas** | **342.640** | **189.284** | **44,8%** | **51,4%** | |
 
 **Mesmas notas e trechos em todas as comparações medidas**, com o mesmo limite de cinco notas e 12.000 caracteres por consulta. Com 1 nota não há o que economizar. A redução aparece a partir de 100 notas e estabiliza entre 50,9% a 51,6% de 1.000 notas em diante, porque as duas versões atingem o mesmo teto. A economia de contexto não custou tempo: em 100.000 notas, a busca atual foi 3,8× mais rápida.
