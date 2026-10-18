@@ -8,25 +8,60 @@ Esta edição pública contém ferramentas, um cofre sintético de exemplo, docu
 
 O vídeo usa a voz do Noah para mostrar o fluxo: você define o objetivo, o agente principal consulta o Cérebro, delega pelo roteador aos auxiliares e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
 
-[![Capa estática do vídeo da arquitetura — clique para abrir o player](media/arquitetura-capa.jpg)](https://nicholasbirochi.github.io/Cerebro/)
+[![Capa do vídeo da arquitetura com botão de play — clique para abrir o player](media/arquitetura-capa.jpg)](https://nicholasbirochi.github.io/Cerebro/)
 
 **[▶ Abrir o player (2min12s)](https://nicholasbirochi.github.io/Cerebro/)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
 
-O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. A capa acima é estática; o MP4 original, com narração, foi mantido.
+O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. No GitHub a capa é uma imagem: clique no play dela para abrir o player. O MP4 original, com narração, foi mantido.
 
 ## A/B: Codex cru × repositório completo
 
 Mesmo modelo, mesma pasta e mesmas perguntas. O Codex **cru** roda sem configuração, regras, AGENTS, hooks ou Cérebro; o **completo** usa o hook, o protocolo, a busca e o roteador local.
 
-[![A/B de acurácia: 4/24 → 24/24 respostas certas](media/ab-acuracia.png)](media/ab-acuracia.png)
+[![One pager do A/B: 30/150 → 150/150 respostas certas e 49% menos tokens por resposta certa](media/ab-acuracia.png)](media/ab-acuracia.png)
 
-[![A/B de tokens: 74% menos tokens por resposta certa](media/ab-tokens.png)](media/ab-tokens.png)
+Nas perguntas que dependem do seu contexto, o acerto foi de **0 para 120 em 120** (6 rodadas, 150 respostas por lado), sem regressão nas tarefas da pasta. O completo lê mais por sessão, mas gasta **49% menos tokens por resposta certa**. Delegar tarefas pequenas ao Qwen 7B local ainda custa mais ao principal do que economiza; o método, os números e os próximos ajustes estão em [docs/AB-CODEX.md](docs/AB-CODEX.md).
 
-Nas perguntas que dependem do seu contexto, o acerto foi de **0% para 100%**, sem regressão nas tarefas da pasta. O completo lê mais por sessão, mas gasta **74% menos tokens por resposta certa**. Delegar tarefas pequenas ao Qwen 7B local ainda custa mais ao principal do que economiza; o método, os números e os próximos ajustes estão em [docs/AB-CODEX.md](docs/AB-CODEX.md).
+## Como os testes foram feitos
+
+Os A/B comparam o mesmo Codex (`gpt-5.6-sol`, esforço médio) em duas condições, e só o ambiente em volta dele muda:
+
+- **Cru**: `codex exec --ignore-user-config --ignore-rules -c project_doc_max_bytes=0 --disable hooks`, ou seja, sem configuração do usuário, regras, AGENTS, hooks ou Cérebro. O prompt pede que ele use só o próprio conhecimento e os arquivos da pasta.
+- **Completo**: a configuração normal da máquina, com hook de início, Protocolo dos Agentes, busca com trechos e roteador de auxiliares.
+
+Cada execução roda numa cópia descartável, com escrita liberada só nessa pasta e sem rede. Os tokens são os que o próprio Codex informa em `turn.completed`: entrada (incluindo o cache) mais saída. O uso de modelos locais vem do registro do roteador. Se o cru executar algo que toque o Cérebro, `.codex` ou `.claude`, a execução é marcada como contaminada.
+
+**Perguntas.** Cada rodada traz 25 perguntas, e foram 6 rodadas. Vinte dependem de regras e decisões que só existem no cofre, como o e-mail dos commits, a pasta de um projeto novo ou o modelo auxiliar. As outras 5 se respondem com os arquivos da pasta. A resposta vem em JSON e é corrigida por expressão regular; "não sei" conta como erro. Uma tarefa extra gera uma tabela Markdown, conferida linha a linha.
+
+**Código, até acertar.** São três tarefas reais, cada uma feita numa cópia de um projeto desta máquina:
+
+| Tarefa | Tipo | Pedido |
+|---|---|---|
+| CNPJ CNAE Scraper | modificar um projeto com contexto | `resumo_por_cnae(linhas)` e uma aba "Resumo" na planilha |
+| Agenda | criar um projeto novo | `proximos(eventos, hoje, dias)` com testes, pronto para publicar no GitHub |
+| Pontos Loop | mudar uma regra financeira | `taxa_periodo(taxa_mensal, dias)` usada em `pv` e verificada em `check()` |
+
+Cada entrega passa por três crivos:
+
+1. **Testes ocultos** que o Codex nunca vê: 6, 5 e 8 casos (empate na ordenação, janela inclusiva, virada de mês, `Decimal`, entrada intacta etc.), além dos testes que o projeto já tinha.
+2. **Extras objetivos**: escrever testes novos e manter o `check_math.py` passando.
+3. **Convenções do usuário**:
+   - pasta `NN - Nome` com o próximo número livre;
+   - README com imagem e `.gitignore`;
+   - descrição em inglês;
+   - perguntar a visibilidade e quais dados entram antes de publicar;
+   - identidade humana nos commits;
+   - nenhum commit em projeto existente;
+   - `FORMULAS.md` atualizado;
+   - retorno em `Decimal`.
+
+A entrega é **correta** quando passa nos ocultos e nos extras, e **aceita** quando, além disso, cumpre todas as convenções. Se não for aceita, a mesma sessão é retomada (`codex exec resume`) com a revisão que um usuário faria: o nome de cada teste que falhou com a última linha do erro e uma frase para cada convenção que falta. O código dos testes nunca é mostrado. São até 5 tentativas por execução. Os tokens são somados até a tentativa correta e até a aceita, para medir **quanto custa chegar ao resultado**, não só a primeira resposta.
+
+A checagem de testes novos no CNPJ entrou depois de uma rodada de validação, que não conta nos números. Os scripts de A/B leem o cofre pessoal e não são distribuídos; as tarefas, os crivos e as mensagens de revisão estão descritos aqui e em [docs/AB-CODEX.md](docs/AB-CODEX.md).
 
 ## Benchmark de contexto: de 1 nota a 1 milhão de notas
 
-[![Benchmark de contexto: seis escalas medidas, de 1 a 100.000 notas, e 1 milhão de notas como projeção identificada](media/one-pager.png)](media/one-pager.png)
+[![Benchmark de tokens: 58% menos tokens por consulta, medido de 1 a 100.000 notas, com 1 milhão de notas como projeção identificada](media/one-pager.png)](media/one-pager.png)
 
 [Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
 

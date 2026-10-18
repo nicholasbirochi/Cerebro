@@ -272,7 +272,7 @@ def agregar(consultas, tokens):
     return agregado
 
 
-def medir_ampliado(quantidades=ESCALAS_RAPIDAS, parcial=None, contar_tokens=False):
+def medir_ampliado(quantidades=ESCALAS_RAPIDAS, parcial=None, contar_tokens=False, espera=3600):
     script_hash = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     anterior = subprocess.run(
         ["git", "-C", str(RAIZ), "show", f"{REFERENCIA}:tools/cerebro.py"],
@@ -309,7 +309,8 @@ def medir_ampliado(quantidades=ESCALAS_RAPIDAS, parcial=None, contar_tokens=Fals
                 corpus = gerar_corpus(base, quantidade, gerado)
                 corpus["segundos_para_gerar_e_conferir"] = round(time.perf_counter() - inicio, 1)
                 gerado = quantidade
-                escala = {"corpus": corpus, "consultas": medir_escala(referencia, atual, base, quantidade, contar)}
+                escala = {"corpus": corpus,
+                          "consultas": medir_escala(referencia, atual, base, quantidade, contar, espera)}
                 escala["agregado"] = agregar(escala["consultas"], contar)
                 salvar_parcial(parcial, identidade, [*escalas, escala])
                 print(f"Conferido: {quantidade:,} notas, {len(CONSULTAS)} consultas pareadas.", file=sys.stderr, flush=True)
@@ -347,7 +348,7 @@ def medir_ampliado(quantidades=ESCALAS_RAPIDAS, parcial=None, contar_tokens=Fals
                         "Não mede inferências, produtividade, qualidade geral das IAs ou economia financeira."]}
 
 
-def medir_escala(referencia, atual, base, quantidade, contar):
+def medir_escala(referencia, atual, base, quantidade, contar, espera=3600):
     resultados = []
     for indice, consulta in enumerate(CONSULTAS):
         opcoes = ["--max", "5", "--orcamento", "12000"]
@@ -360,7 +361,7 @@ def medir_escala(referencia, atual, base, quantidade, contar):
         saidas, recursos = {}, {}
         for versao, script in ordem:
             saidas[versao], recursos[versao] = executar(script, base, *opcoes, termos=consulta["termos"],
-                                                        espera=3600)
+                                                        espera=espera)
             print(f"{quantidade:,} notas, consulta {indice + 1}/{len(CONSULTAS)}, {versao}: "
                   f"{recursos[versao]['segundos']}s, {recursos[versao]['pico_memoria_mb']} MB.",
                   file=sys.stderr, flush=True)
@@ -398,13 +399,15 @@ if __name__ == "__main__":
     parser.add_argument("--parcial", help="arquivo de progresso: grava cada escala concluída e retoma dele")
     parser.add_argument("--tokens", action="store_true",
                         help="conta tokens o200k_base com tiktoken instalado à parte (não é o tokenizador do Claude)")
+    parser.add_argument("--espera", type=int, default=3600,
+                        help="limite por busca, em segundos (padrão 3600); 1.000.000 de notas pede várias horas")
     args = parser.parse_args()
     if args.escalas and (len(set(args.escalas)) != len(args.escalas) or
                          not all(1 <= q <= ESCALAS[-1] for q in args.escalas)):
         parser.error("cada escala deve aparecer uma única vez, entre 1 e 1.000.000")
     escolhidas = tuple(args.escalas or (ESCALAS if args.completo else ESCALAS_RAPIDAS))
     try:
-        print(json.dumps(medir_ampliado(escolhidas, args.parcial, args.tokens)
+        print(json.dumps(medir_ampliado(escolhidas, args.parcial, args.tokens, args.espera)
                          if args.ampliado or args.completo or args.escalas else medir(),
                          ensure_ascii=False, indent=2))
     except ImportError:

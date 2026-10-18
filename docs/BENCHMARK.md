@@ -2,7 +2,7 @@
 
 Executado em 17/10/2026 em um Apple M5 com 24 GB de RAM, macOS e Python 3.14.7. O teste compara a busca `--trechos` da revisão pública de referência `40569e8` com a versão atual, usando apenas notas sintéticas. Não acessa o cofre pessoal, não chama IA e não usa API paga.
 
-![Benchmark de contexto em sete escalas](../media/one-pager.png)
+![Benchmark de tokens por consulta em sete escalas](../media/one-pager.png)
 
 [Slide editável (PowerPoint)](../media/one-pager.pptx) · [JSON completo da execução](benchmark-ampliado.json)
 
