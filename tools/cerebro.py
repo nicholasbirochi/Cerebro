@@ -110,9 +110,15 @@ def sha256(dados: bytes) -> str:
 # ---------------------------------------------------------------- cofre
 
 
+def cofre_padrao() -> Path:
+    """Pasta acima da ferramenta quando ela é um cofre (instalação em .cerebro); senão o exemplo do repositório."""
+    acima = Path(__file__).resolve().parent.parent
+    return acima if (acima / PROTOCOLO).is_file() else acima / "examples" / "cofre"
+
+
 def cofre() -> Path:
     bruto = os.environ.get("CEREBRO_DIR")
-    base = Path(bruto).expanduser() if bruto else Path(__file__).resolve().parent.parent / "examples" / "cofre"
+    base = Path(bruto).expanduser() if bruto else cofre_padrao()
     if not base.is_absolute():
         raise Erro(f"CEREBRO_DIR precisa ser absoluto: {base}")
     if os.path.islink(base):

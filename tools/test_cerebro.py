@@ -526,5 +526,41 @@ class CofreSintetico(unittest.TestCase):
             protocolo.chmod(0o644)
 
 
+
+class CopiaUnica(unittest.TestCase):
+    """O mesmo código serve ao repositório (cofre de exemplo) e à instalação em <cofre>/.cerebro."""
+    COMPARTILHADOS = ("cerebro.py", "auxiliares.py", "backup_cerebro.py",
+                      "test_cerebro.py", "test_auxiliares.py", "test_backup_cerebro.py")
+
+    def test_cofre_padrao_e_a_pasta_acima_quando_ela_tem_protocolo(self):
+        tmp = Path(tempfile.mkdtemp(prefix="cerebro-padrao-"))
+        self.addCleanup(shutil.rmtree, tmp, True)
+        for raiz, e_cofre in ((tmp / "Cofre", True), (tmp / "Repositorio", False)):
+            (raiz / "tools").mkdir(parents=True)
+            shutil.copy(SCRIPT, raiz / "tools" / "cerebro.py")
+            shutil.copy(SCRIPT.with_name("backup_cerebro.py"), raiz / "tools" / "backup_cerebro.py")
+            if e_cofre:
+                (raiz / cerebro.PROTOCOLO).parent.mkdir(parents=True)
+                (raiz / cerebro.PROTOCOLO).write_text("# Protocolo\n", encoding="utf-8")
+            esperado = raiz if e_cofre else raiz / "examples" / "cofre"
+            for nome, expressao in (("cerebro.py", "m.cofre_padrao()"), ("backup_cerebro.py", "m.COFRE")):
+                env = {k: v for k, v in os.environ.items() if k != "CEREBRO_DIR"}
+                codigo = ("import importlib.util as u, sys; s = u.spec_from_file_location('m', sys.argv[1]); "
+                          f"m = u.module_from_spec(s); s.loader.exec_module(m); print({expressao})")
+                saida = subprocess.run([sys.executable, "-c", codigo, str(raiz / "tools" / nome)], env=env,
+                                       capture_output=True, text=True, timeout=30)
+                self.assertEqual(saida.returncode, 0, saida.stderr)
+                self.assertEqual(Path(saida.stdout.strip()).resolve(), esperado.resolve(), nome)
+
+    def test_instalacao_local_igual_ao_repositorio(self):
+        aqui = SCRIPT.parent
+        viva = Path(os.environ.get("CEREBRO_FERRAMENTA") or Path.home() / "Documents" / "Cérebro" / ".cerebro")
+        if not (aqui.parent / "examples" / "cofre").is_dir() or not viva.is_dir() or viva.resolve() == aqui.resolve():
+            self.skipTest("só roda no repositório, com a instalação local presente")
+        diferentes = [n for n in self.COMPARTILHADOS
+                      if (viva / n).exists() and (viva / n).read_bytes() != (aqui / n).read_bytes()]
+        self.assertEqual(diferentes, [], f"copie de {aqui} para {viva}")
+
+
 if __name__ == "__main__":
     unittest.main()

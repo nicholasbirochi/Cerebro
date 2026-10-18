@@ -134,7 +134,7 @@ python3 tools/cerebro.py verificar
 python3 -m unittest discover -s tools -p 'test_*.py' -q
 ```
 
-O padrão desta distribuição é `examples/cofre`. Para usar seu próprio cofre privado, configure `CEREBRO_DIR` com um caminho absoluto fora do repositório público. As atualizações de notas existentes exigem o hash lido anteriormente e usam trava e escrita atômica.
+O cofre padrão é a pasta acima de `tools/` quando ela contém o protocolo (instalação em `<cofre>/.cerebro`); no repositório, sem protocolo na raiz, é `examples/cofre`. Assim o mesmo código roda nos dois lugares, sem edição, e `test_cerebro.CopiaUnica` acusa se a instalação local (`~/Documents/Cérebro/.cerebro` ou `CEREBRO_FERRAMENTA`) divergir do repositório. `CEREBRO_DIR`, com caminho absoluto, substitui o padrão. As atualizações de notas existentes exigem o hash lido anteriormente e usam trava e escrita atômica.
 
 ### Contexto em camadas
 

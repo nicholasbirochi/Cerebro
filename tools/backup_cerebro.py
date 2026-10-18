@@ -9,7 +9,9 @@ CEREBRO_DIR substitui o cofre (usado nos testes com cofre sintético)."""
 import datetime, hashlib, json, os, platform, plistlib, subprocess, sys, tarfile, tempfile
 from pathlib import Path
 
-COFRE = Path(os.environ.get("CEREBRO_DIR") or Path(__file__).resolve().parent.parent / "examples" / "cofre")
+_ACIMA = Path(__file__).resolve().parent.parent  # mesma regra de cerebro.cofre_padrao
+_PADRAO = _ACIMA if (_ACIMA / "00 - Regras para Agentes" / "Protocolo dos Agentes.md").is_file() else _ACIMA / "examples" / "cofre"
+COFRE = Path(os.environ.get("CEREBRO_DIR") or _PADRAO)
 FORA = {".DS_Store", "__pycache__", ".trava"}
 
 
