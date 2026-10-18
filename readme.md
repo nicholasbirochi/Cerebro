@@ -6,11 +6,11 @@ Esta edição pública contém ferramentas, um cofre sintético de exemplo, docu
 
 ## Vídeo da arquitetura
 
-O vídeo usa a voz do Noah para mostrar o fluxo: o agente principal consulta o Cérebro, delega pelo roteador e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
+O vídeo usa a voz do Noah para mostrar o fluxo: você define o objetivo, o agente principal consulta o Cérebro, delega pelo roteador aos auxiliares e revisa o resultado. É uma ilustração do funcionamento, sem representar telemetria de mensagens reais.
 
 [![Capa estática do vídeo da arquitetura — clique para abrir o player](media/arquitetura-capa.jpg)](https://nicholasbirochi.github.io/Cerebro/)
 
-**[▶ Abrir o player (1min40s)](https://nicholasbirochi.github.io/Cerebro/)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
+**[▶ Abrir o player (2min12s)](https://nicholasbirochi.github.io/Cerebro/)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
 
 O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. A capa acima é estática; o MP4 original, com narração, foi mantido.
 
