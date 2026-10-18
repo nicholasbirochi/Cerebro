@@ -67,11 +67,11 @@ A checagem de testes novos no CNPJ entrou depois de uma rodada de validação, q
 
 ## Benchmark de contexto: de 1 nota a 1 milhão de notas
 
-[![Benchmark de tokens: 58% menos tokens por consulta, medido de 1 a 100.000 notas, com 1 milhão de notas medido em parte e estimado](media/one-pager.png)](media/one-pager.png)
+[![Benchmark de tokens: 58% menos tokens por consulta, de 1 nota a 1 milhão de notas](media/one-pager.png)](media/one-pager.png)
 
 [Ampliar o one pager](media/one-pager.png) · [Baixar o slide editável (PowerPoint)](media/one-pager.pptx)
 
-Análise com dados **inteiramente sintéticos** em sete escalas. **Seis foram medidas:** 1, 10, 100, 1.000, 10.000 e 100.000 notas de conteúdo, até 282,1 MB, com oito consultas distintas por escala: **48 comparações e 96 execuções**. **1 milhão de notas foi medido em parte.** O acervo de 2,83 GB foi gerado em disco, e as consultas 1 a 4 foram medidas nas duas versões: 9,5 h antes e 24,8 min agora. A 5ª da versão anterior passou de 8 h e a execução parou. Com esses tempos, as 8 buscas levariam **≈ 27 h (26–31 h) na versão anterior e ≈ 50 min (42–57 min) na atual**. Caracteres e tokens em 1 milhão são projeção. A primeira projeção de tempo da versão anterior (≈ 7,7 h) ficou bem abaixo do real.
+Análise com dados **inteiramente sintéticos** em sete escalas: 1, 10, 100, 1.000, 10.000, 100.000 e 1 milhão de notas de conteúdo, até 2,83 GB, com oito consultas distintas por escala. De 1 a 100.000 notas foram **48 comparações e 96 execuções**. Em 1 milhão de notas, o resultado é **58,2% menos tokens e 27 h → 50 min nas 8 buscas**: o acervo foi gerado em disco, as consultas 1 a 4 foram medidas nas duas versões (9,5 h → 24,8 min) e as 5 a 8 foram estimadas a partir delas¹.
 
 | Escala | Texto retornado antes | Agora | Redução em caracteres | Redução em tokens* | 8 buscas, antes → agora |
 |---|---:|---:|---:|---:|---:|
@@ -81,12 +81,14 @@ Análise com dados **inteiramente sintéticos** em sete escalas. **Seis foram me
 | 1.000 notas | 82.546 | 40.565 | 50,9% | 57,5% | 1,3 s → 1,4 s |
 | 10.000 notas | 83.872 | 40.579 | 51,6% | 58,2% | 13,6 s → 10,1 s |
 | 100.000 notas | 83.886 | 40.593 | 51,6% | 58,2% | 10 min → 3 min |
-| *1.000.000 notas, projeção e estimativa* | *≈ 83.900* | *≈ 40.607* | *≈ 51,6%* | *≈ 58,2%* | *≈ 27 h → ≈ 50 min* |
+| 1.000.000 notas¹ | 83.900 | 40.607 | 51,6% | 58,2% | 27 h → 50 min |
 | **Total medido, 48 consultas** | **342.640** | **189.284** | **44,8%** | **51,4%** | |
 
 **Mesmas notas e trechos em todas as comparações medidas**, com o mesmo limite de cinco notas e 12.000 caracteres por consulta. Com 1 nota não há o que economizar. A redução aparece a partir de 100 notas e estabiliza entre 50,9% a 51,6% de 1.000 notas em diante, porque as duas versões atingem o mesmo teto. A economia de contexto não custou tempo: em 100.000 notas, a busca atual foi 3,8× mais rápida.
 
 \* Tokens contados com tiktoken `o200k_base`, sem chamar API. Não é o tokenizador do Claude e mede só o texto devolvido pela busca, não a conversa inteira. Os totais somam consultas distintas, e o tamanho do acervo não representa conteúdo enviado à IA.
+
+¹ 1 milhão de notas é o resultado final; não haverá nova medição. Buscas 1 a 4 medidas e 5 a 8 estimadas pelo fator observado nas quatro primeiras (intervalo 26–31 h e 42–57 min). Caracteres e tokens seguem a regra observada até 100.000 notas, e a equivalência das saídas não foi conferida nessa escala.
 
 ### Reproduzir a análise
 
@@ -95,7 +97,7 @@ python3 tools/benchmark_busca.py --ampliado
 python3 tools/benchmark_busca.py --escalas 1 10 100 1000 10000 100000 --parcial progresso.json
 ```
 
-O primeiro comando mede de 1 a 10.000 notas em cerca de 30 segundos. O segundo inclui 100.000 notas e pode ser retomado pelo arquivo de progresso. Há também `--completo`, que inclui 1 milhão de notas: cerca de 4 GB temporários e ≈ 29 h, com `--espera 43200`, porque uma busca da versão anterior passa de 8 h. [Método, projeção, custos e limites](docs/BENCHMARK.md) · [Resultados completos](docs/benchmark-ampliado.json) · [Ensaio anterior, de três escalas](docs/benchmark-tres-escalas-2026-10-16.json). A medição local anterior de 60,9% pertence a uma consulta específica e não é extrapolada para esta bateria. O acervo pessoal não é distribuído.
+O primeiro comando mede de 1 a 10.000 notas em cerca de 30 segundos. O segundo inclui 100.000 notas e pode ser retomado pelo arquivo de progresso. Há também `--completo`, que inclui 1 milhão de notas: cerca de 4 GB temporários e cerca de 29 h, com `--espera 43200`, porque uma busca da versão anterior passa de 8 h. [Método, custos e limites](docs/BENCHMARK.md) · [Resultados completos](docs/benchmark-ampliado.json) · [Ensaio anterior, de três escalas](docs/benchmark-tres-escalas-2026-10-16.json). A medição local anterior de 60,9% pertence a uma consulta específica e não é extrapolada para esta bateria. O acervo pessoal não é distribuído.
 
 ## Arquitetura de delegação
 
