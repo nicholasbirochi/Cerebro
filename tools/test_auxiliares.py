@@ -312,6 +312,104 @@ class CopilotRoutingTests(unittest.TestCase):
         infer.assert_called_once(); local.assert_not_called(); remote.assert_not_called(); key.assert_not_called()
 
 
+class LocalFirstRoutingTests(unittest.TestCase):
+    ALL = ["qwen2.5-coder:7b", "qwen2.5-coder:14b", "qwen3-coder:30b"]
+
+    def test_code_goes_local_before_copilot(self):
+        self.assertEqual(a.choose("codigo", self.ALL, [], True, True), ("ollama", "qwen2.5-coder:14b"))
+
+    def test_analysis_uses_30b_only_with_free_memory(self):
+        self.assertEqual(a.choose("analise", self.ALL, [], True, True, free_gb=21), ("ollama", "qwen3-coder:30b"))
+        self.assertEqual(a.choose("analise", self.ALL, [], True, True, free_gb=8), ("nemotron", a.REMOTE_MODEL))
+        self.assertEqual(a.choose("analise", self.ALL, [], False, True, free_gb=8), ("ollama", "qwen2.5-coder:14b"))
+
+    def test_resident_model_is_reused_without_loading_another(self):
+        self.assertEqual(a.choose("analise", self.ALL, ["qwen3-coder:30b"], True, True), ("ollama", "qwen3-coder:30b"))
+        self.assertEqual(a.choose("analise", self.ALL, ["qwen2.5-coder:7b"], True, True), ("nemotron", a.REMOTE_MODEL))
+
+    def test_unknown_memory_never_loads_30b(self):
+        with patch.object(a.subprocess, "run", side_effect=OSError):
+            self.assertEqual(a.free_memory_gb(), 0)
+
+    def test_busy_ollama_falls_back_to_free_remote_once(self):
+        with patch.object(a, "copilot_available", return_value=True), \
+             patch.object(a, "local_inventory", return_value=(["qwen2.5-coder:14b"], [])), \
+             patch.object(a.fcntl, "flock", side_effect=BlockingIOError), \
+             patch.object(a, "infer_local") as local, \
+             patch.object(a, "infer_copilot", return_value=("ok", 1, 1, "auto")) as copilot, \
+             patch.object(a, "log_usage"), patch("sys.stdin", io.StringIO("2+2")), \
+             contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(a.main(["--tipo", "codigo"]), 0)
+        local.assert_not_called(); copilot.assert_called_once()
+        self.assertEqual(json.loads(out.getvalue())["provider"], "copilot")
+
+    def test_usage_log_has_no_prompt_and_needs_private_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with patch.object(a, "__file__", str(Path(tmp) / "auxiliares.py")):
+                a.log_usage("codigo", {"provider": "ollama", "response": "segredo"})
+                self.assertFalse((Path(tmp) / "uso-auxiliares.jsonl").exists())
+                (Path(tmp) / "auxiliares.json").write_text("{}")
+                a.log_usage("codigo", {"provider": "ollama", "model": "m", "response": "segredo"})
+                line = (Path(tmp) / "uso-auxiliares.jsonl").read_text()
+        self.assertNotIn("segredo", line)
+        self.assertEqual(json.loads(line)["provider"], "ollama")
+
+
+class OutputFileTests(unittest.TestCase):
+    """The principal can delegate repetitive text without reading or retyping it."""
+
+    def run_main(self, argv, reply):
+        with patch.object(a, "copilot_available", return_value=False), \
+             patch.object(a, "nvidia_key", return_value=""), patch.object(a, "free_memory_gb", return_value=0), \
+             patch.object(a, "local_inventory", return_value=(["qwen2.5-coder:7b"], [])), \
+             patch.object(a, "infer_local", return_value=(reply, 10, 20)) as local, \
+             patch.object(a, "log_usage") as log, patch("sys.stdin", io.StringIO("prompt")), \
+             contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
+            code = a.main(["--tipo", "mecanica", *argv])
+        return code, out.getvalue(), err.getvalue(), local, log
+
+    def test_valid_response_goes_to_new_file_not_to_principal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "descricoes.md"
+            code, out, _, _, log = self.run_main(
+                ["--saida", str(target), "--linhas", "2", "--padrao", r"\w+: .+"], "Maçã: doce.\n\nPera: suave.\n")
+            self.assertEqual(code, 0)
+            self.assertEqual(target.read_text(), "Maçã: doce.\n\nPera: suave.\n")
+        result = json.loads(out)
+        self.assertNotIn("response", result)
+        self.assertNotIn("doce", out)
+        self.assertEqual(result["saida"], str(target))
+        log.assert_called_once()
+
+    def test_rejected_response_keeps_only_a_draft_and_is_not_retried(self):
+        cases = ((["--linhas", "3"], "a\nb", "esperava 3 linhas"),
+                 (["--padrao", r"\w+: .+"], "Maçã: doce\nsem formato\nPera: suave\nruim", "linhas 2, 4"))
+        for argv, reply, detail in cases:
+            with self.subTest(argv=argv), tempfile.TemporaryDirectory() as tmp:
+                target = Path(tmp) / "saida.md"
+                code, out, err, local, log = self.run_main(["--saida", str(target), *argv], reply)
+                self.assertEqual(code, 1)
+                self.assertFalse(target.exists())
+                self.assertEqual(Path(str(target) + ".rascunho").read_text(), reply + "\n")
+                self.assertIn("reprovada", err)
+                self.assertIn(detail, err)
+                self.assertEqual(out, "")
+                local.assert_called_once()
+                log.assert_called_once()  # Spent tokens are still counted.
+
+    def test_existing_file_and_bad_pattern_fail_before_inference(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "existe.md"
+            target.write_text("original")
+            draft = Path(tmp) / "novo.md.rascunho"
+            draft.write_text("antigo")
+            for argv in (["--saida", str(target)], ["--saida", str(Path(tmp) / "novo.md")], ["--padrao", "("]):
+                with self.subTest(argv=argv):
+                    code, _, _, local, _ = self.run_main(argv, "x")
+                    self.assertEqual(code, 1)
+                    local.assert_not_called()
+            self.assertEqual(target.read_text(), "original")
+
 
 if __name__ == "__main__":
     unittest.main()

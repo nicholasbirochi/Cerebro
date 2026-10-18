@@ -122,34 +122,73 @@ def family(name):
     return int(m.group(1)) if m else 0
 
 
-def choose(tipo, installed, loaded, has_key, has_copilot=False):
-    desired = "qwen2.5-coder:7b" if tipo == "mecanica" else "qwen2.5-coder:14b"
-    if tipo == "codigo" and has_copilot:
-        return "copilot", "auto"
-    if tipo == "analise" and has_key:
-        return "nemotron", REMOTE_MODEL
-    if tipo == "analise" and has_copilot:
-        return "copilot", "auto"
-    if loaded:
-        candidates = [m for m in loaded if family(m) in (7, 14, 30)]
-        preferred = (7, 14, 30) if tipo == "mecanica" else (14, 30, 7)
-        for size in preferred:
-            match = next((m for m in candidates if family(m) == size), None)
+# Local first: free, private and no Claude/GPT tokens. Each route is tried in order;
+# a local model is used only if resident, or installed with nothing else loaded.
+ROUTES = {
+    "mecanica": ("qwen2.5-coder:7b", "qwen2.5-coder:14b", "nemotron", "copilot"),
+    "codigo": ("qwen2.5-coder:14b", "qwen3-coder:30b", "qwen2.5-coder:7b", "copilot", "nemotron"),
+    "analise": ("qwen3-coder:30b", "nemotron", "qwen2.5-coder:14b", "copilot"),
+}
+BIG_MODEL_MIN_FREE_GB = 20  # 30B (~18 GB) loads only when this much memory is reclaimable.
+
+
+def free_memory_gb():
+    """Free + inactive + speculative pages (macOS); 0 when unknown, so the 30B is never forced."""
+    try:
+        out = subprocess.run(["vm_stat"], capture_output=True, text=True, timeout=5).stdout
+        page = int(re.search(r"page size of (\d+)", out).group(1))
+        pages = sum(int(re.search(name + r":\s+(\d+)", out).group(1))
+                    for name in ("Pages free", "Pages inactive", "Pages speculative"))
+        return pages * page / 1e9
+    except (OSError, AttributeError, ValueError, subprocess.SubprocessError):
+        return 0
+
+
+def choose(tipo, installed, loaded, has_key, has_copilot=False, free_gb=0):
+    for step in ROUTES[tipo]:
+        if step == "nemotron":
+            if has_key:
+                return "nemotron", REMOTE_MODEL
+        elif step == "copilot":
+            if has_copilot:
+                return "copilot", "auto"
+        elif loaded:
+            match = next((m for m in loaded if family(m) == family(step)), None)
             if match:
                 return "ollama", match
-        if has_key:
-            return "nemotron", REMOTE_MODEL
-        if has_copilot:
-            return "copilot", "auto"
+        else:
+            match = next((m for m in installed if m == step or m.startswith(step + "-")), None)
+            if match and (family(match) != 30 or free_gb >= BIG_MODEL_MIN_FREE_GB):
+                return "ollama", match
+    if loaded:
         raise RouterError("Há outro modelo local carregado e nenhum modelo adequado residente; valide o acesso gratuito NVIDIA ou libere o Ollama.")
-    match = next((m for m in installed if m == desired or m.startswith(desired + "-")), None)
-    if match:
-        return "ollama", match
-    if has_key:
-        return "nemotron", REMOTE_MODEL
-    if has_copilot:
-        return "copilot", "auto"
     raise RouterError("Modelo local necessário indisponível e acesso NVIDIA não configurado ou não validado.")
+
+
+def log_usage(tipo, result):
+    """Counts delegated work without prompts or responses; only where the private config exists."""
+    if not Path(__file__).with_name("auxiliares.json").exists():
+        return
+    entry = {"data": time.strftime("%Y-%m-%dT%H:%M:%S"), "tipo": tipo,
+             **{k: result.get(k) for k in ("provider", "model", "input_tokens", "output_tokens", "elapsed_seconds")}}
+    try:
+        with open(Path(__file__).with_name("uso-auxiliares.jsonl"), "a") as log:
+            log.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
+
+
+def check_output(response, lines=None, pattern=None):
+    """Return why the response breaks the requested shape, or None when it fits."""
+    rows = [row.strip() for row in response.strip().splitlines() if row.strip()]
+    problems = []
+    if lines is not None and len(rows) != lines:
+        problems.append(f"esperava {lines} linhas e vieram {len(rows)}")
+    if pattern is not None:
+        bad = [str(number) for number, row in enumerate(rows, 1) if not pattern.fullmatch(row)]
+        if bad:
+            problems.append(f"fora do padrão: linhas {', '.join(bad)}")
+    return "; ".join(problems) or None
 
 
 def validate_prompt(prompt):
@@ -268,10 +307,20 @@ def main(argv=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--tipo", choices=("mecanica", "codigo", "analise"), default="codigo")
     parser.add_argument("--provedor", choices=("auto", "ollama", "nemotron", "copilot"), default="auto")
+    parser.add_argument("--saida", help="grava a resposta neste arquivo novo e omite o texto do JSON")
+    parser.add_argument("--linhas", type=int, help="exige este número de linhas não vazias")
+    parser.add_argument("--padrao", help="expressão regular que cada linha não vazia precisa seguir inteira")
     args = parser.parse_args(argv)
     prompt = sys.stdin.read(MAX_INPUT + 1)
     try:
         validate_prompt(prompt)
+        try:
+            pattern = re.compile(args.padrao) if args.padrao else None
+        except re.error as exc:
+            raise RouterError(f"Padrão inválido: {exc}.")
+        draft = args.saida + ".rascunho" if args.saida else None
+        if args.saida and (os.path.lexists(args.saida) or os.path.lexists(draft)):
+            raise RouterError("O arquivo de saída ou o rascunho já existe; não sobrescrevo.")
         copilot = args.provedor in ("auto", "copilot") and copilot_available()
         key = "" if args.provedor == "copilot" or (args.tipo == "codigo" and copilot) else nvidia_key()
         if args.provedor == "copilot":
@@ -287,24 +336,28 @@ def main(argv=None):
                 installed, loaded = local_inventory()
             except Exception:
                 installed, loaded = [], []
-            provider, model = choose(args.tipo, installed, loaded,
-                bool(key) and remote_enabled() and args.provedor == "auto", copilot)
+            has_key = bool(key) and remote_enabled() and args.provedor == "auto"
+            free_gb = free_memory_gb()
+            provider, model = choose(args.tipo, installed, loaded, has_key, copilot, free_gb)
         started = time.monotonic()
         if provider == "ollama":
             lock = os.open("/tmp/cerebro-ollama-" + str(os.getuid()) + ".lock", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
             try:
                 try:
                     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    installed, loaded = local_inventory()
+                    provider, model = choose(args.tipo, installed, loaded, False, False, free_gb)
+                    response, input_tokens, output_tokens = infer_local(model, prompt)
                 except BlockingIOError:
-                    raise RouterError("Outro auxiliar já está usando o Ollama; não iniciei inferência.")
-                installed, loaded = local_inventory()
-                provider, model = choose(args.tipo, installed, loaded, False)
-                response, input_tokens, output_tokens = infer_local(model, prompt)
+                    # Ollama busy: take the next free remote step instead of waking Claude/GPT.
+                    if args.provedor == "ollama":
+                        raise RouterError("Outro auxiliar já está usando o Ollama; não iniciei inferência.")
+                    provider, model = choose(args.tipo, [], [], has_key, copilot)
             finally:
                 os.close(lock)
-        elif provider == "copilot":
+        if provider == "copilot":
             response, input_tokens, output_tokens, model = infer_copilot(prompt)
-        else:
+        elif provider == "nemotron":
             response, input_tokens, output_tokens = infer_remote(prompt, key)
         if not isinstance(response, str) or not response.strip():
             raise RouterError("O modelo retornou uma resposta vazia; resultado não validado.")
@@ -316,6 +369,21 @@ def main(argv=None):
         elif provider == "copilot":
             result["via"] = "copilot-cli"
             result["routing_profile"] = "efficiency"
+        log_usage(args.tipo, result)
+        problem = check_output(response, args.linhas, pattern)
+        if problem:
+            # One attempt only. The draft lets the principal fix just the listed lines instead of redoing all of them.
+            if args.saida:
+                with open(draft, "x", encoding="utf-8") as output:
+                    output.write(response.strip() + "\n")
+                raise RouterError(f"Resposta reprovada na validação ({problem}); {args.saida} não foi gravado, "
+                                  f"rascunho em {draft}: corrija só essas linhas.")
+            raise RouterError(f"Resposta reprovada na validação ({problem}); nada gravado.")
+        if args.saida:
+            with open(args.saida, "x", encoding="utf-8") as output:
+                output.write(response.strip() + "\n")
+            del result["response"]
+            result["saida"] = args.saida
         print(json.dumps(result, ensure_ascii=False))
         return 0
     except Exception as exc:

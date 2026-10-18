@@ -14,6 +14,16 @@ O vídeo usa a voz do Noah para mostrar o fluxo: você define o objetivo, o agen
 
 O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. A capa acima é estática; o MP4 original, com narração, foi mantido.
 
+## A/B: Codex cru × repositório completo
+
+Mesmo modelo, mesma pasta e mesmas perguntas. O Codex **cru** roda sem configuração, regras, AGENTS, hooks ou Cérebro; o **completo** usa o hook, o protocolo, a busca e o roteador local.
+
+[![A/B de acurácia: 4/24 → 24/24 respostas certas](media/ab-acuracia.png)](media/ab-acuracia.png)
+
+[![A/B de tokens: 74% menos tokens por resposta certa](media/ab-tokens.png)](media/ab-tokens.png)
+
+Nas perguntas que dependem do seu contexto, o acerto foi de **0% para 100%**, sem regressão nas tarefas da pasta. O completo lê mais por sessão, mas gasta **74% menos tokens por resposta certa**. Delegar tarefas pequenas ao Qwen 7B local ainda custa mais ao principal do que economiza; o método, os números e os próximos ajustes estão em [docs/AB-CODEX.md](docs/AB-CODEX.md).
+
 ## Benchmark de contexto: de 1 nota a 1 milhão de notas
 
 [![Benchmark de contexto: seis escalas medidas, de 1 a 100.000 notas, e 1 milhão de notas como projeção identificada](media/one-pager.png)](media/one-pager.png)

@@ -158,5 +158,5 @@ Ambas as versões recebem `--trechos --max 5 --orcamento 12000`. As notas têm t
 - Caracteres Unicode, bytes UTF-8 e tokens são unidades distintas. A contagem de tokens usa `o200k_base`, não o tokenizador do Claude.
 - O tamanho do acervo consultado não é o volume enviado a um modelo.
 - A equivalência compara a seleção de contexto nestes casos e não avalia inferências nem a qualidade geral das IAs.
-- Tokens de entrada, saída e raciocínio de uma conversa completa, cache de modelos, produtividade e economia financeira não foram medidos.
+- Esta bateria não mede tokens de uma conversa completa. O A/B com o Codex cru e o repositório completo, com tokens do modelo e acurácia, está em [AB-CODEX.md](AB-CODEX.md). Produtividade e economia financeira não foram medidas.
 - Os percentuais dependem do cenário. Não há promessa universal de 50% ou 60%.

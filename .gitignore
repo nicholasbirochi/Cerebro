@@ -8,6 +8,7 @@
 !docs/
 !docs/ARQUITETURA.md
 !docs/BENCHMARK.md
+!docs/AB-CODEX.md
 !docs/benchmark-ampliado.json
 !docs/benchmark-tres-escalas-2026-10-16.json
 !examples/
@@ -17,6 +18,8 @@
 !media/arquitetura-capa.jpg
 !media/one-pager.png
 !media/one-pager.pptx
+!media/ab-acuracia.png
+!media/ab-tokens.png
 !tools/
 !tools/auxiliares.json
 !tools/auxiliares.py
