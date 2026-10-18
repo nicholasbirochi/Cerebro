@@ -17,6 +17,7 @@ import urllib.error
 import urllib.request
 
 OLLAMA = "http://localhost:11434"
+OLLAMA_RELAY = "http://127.0.0.1:11435"  # Codenotch relay: forwards to OLLAMA and records token usage.
 NVIDIA = "https://integrate.api.nvidia.com/v1/chat/completions"
 REMOTE_MODEL = "nvidia/nemotron-3-ultra-550b-a55b"
 SYSTEM = "Responda de forma breve e objetiva. Não use ferramentas nem solicite acesso a arquivos."
@@ -42,9 +43,24 @@ def request(url, data=None, headers=None):
         return json.loads(response.read())
 
 
+_ollama_base = None
+
+
+def ollama_base():
+    """Prefer the local Codenotch relay so local tokens are counted; fall back to Ollama itself."""
+    global _ollama_base
+    if _ollama_base is None:
+        try:
+            request(OLLAMA_RELAY + "/api/version")
+            _ollama_base = OLLAMA_RELAY
+        except (urllib.error.URLError, OSError, ValueError):
+            _ollama_base = OLLAMA
+    return _ollama_base
+
+
 def local_inventory():
-    tags = request(OLLAMA + "/api/tags").get("models", [])
-    ps = request(OLLAMA + "/api/ps").get("models", [])
+    tags = request(ollama_base() + "/api/tags").get("models", [])
+    ps = request(ollama_base() + "/api/ps").get("models", [])
     return [m.get("name", "") for m in tags], [m.get("name", "") for m in ps]
 
 
@@ -153,7 +169,7 @@ def validate_prompt(prompt):
 
 
 def infer_local(model, prompt):
-    data = request(OLLAMA + "/api/generate", {
+    data = request(ollama_base() + "/api/generate", {
         "model": model, "prompt": prompt, "system": SYSTEM, "stream": False,
         "keep_alive": "2m", "options": {"num_ctx": 8192, "num_predict": MAX_OUTPUT},
     })

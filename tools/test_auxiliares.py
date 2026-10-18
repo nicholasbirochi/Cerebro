@@ -25,6 +25,8 @@ class RoutingTests(unittest.TestCase):
         (root / 'opencode/opencode.json').write_text('{}')
         location = patch.object(a, '__file__', str(root / 'auxiliares.py'))
         location.start(); self.addCleanup(location.stop)
+        base = patch.object(a, "_ollama_base", None)
+        base.start(); self.addCleanup(base.stop)
         # Never touch the real Keychain in tests.
         patcher = patch.object(a, "keychain_key", return_value="")
         patcher.start(); self.addCleanup(patcher.stop)
@@ -76,9 +78,9 @@ class RoutingTests(unittest.TestCase):
             installed, loaded = a.local_inventory()
             provider, model = a.choose("codigo", installed, loaded, False)
             response, inp, out = a.infer_local(model, "faça uma revisão")
-        self.assertEqual([c[0] for c in calls[:2]], [a.OLLAMA + "/api/tags", a.OLLAMA + "/api/ps"])
-        url, payload, _ = calls[2]
-        self.assertEqual(url, a.OLLAMA + "/api/generate")
+        self.assertEqual([c[0] for c in calls[:3]], [a.OLLAMA_RELAY + "/api/version", a.OLLAMA_RELAY + "/api/tags", a.OLLAMA_RELAY + "/api/ps"])
+        url, payload, _ = calls[3]
+        self.assertEqual(url, a.OLLAMA_RELAY + "/api/generate")
         self.assertEqual((payload["options"]["num_ctx"], payload["options"]["num_predict"], payload["keep_alive"]), (8192, 1024, "2m"))
         self.assertEqual((provider, model, response, inp, out), ("ollama", "qwen2.5-coder:14b", "feito", 4, 3))
 
@@ -127,10 +129,25 @@ class RoutingTests(unittest.TestCase):
                 with self.assertRaisesRegex(a.RouterError, 'sessão'):
                     a.infer_remote('pergunta', 'fake-key')
 
+    def test_relay_unavailable_falls_back_to_ollama(self):
+        calls = []
+        def fake(url, data=None, headers=None):
+            calls.append(url)
+            if url.startswith(a.OLLAMA_RELAY):
+                raise a.urllib.error.URLError("connection refused")
+            return {"models": []}
+        with patch.object(a, "request", side_effect=fake):
+            a.local_inventory()
+            a.local_inventory()
+        self.assertEqual(calls, [a.OLLAMA_RELAY + "/api/version", a.OLLAMA + "/api/tags", a.OLLAMA + "/api/ps",
+                                 a.OLLAMA + "/api/tags", a.OLLAMA + "/api/ps"])
+
     def test_inference_error_is_not_retried(self):
         calls = []
         def fake(url, data=None, headers=None):
             calls.append(url)
+            if url.endswith("/api/version"):
+                return {"version": "test"}
             if url.endswith("/api/tags"):
                 return {"models": [{"name": "qwen2.5-coder:14b"}]}
             if url.endswith("/api/ps"):
@@ -141,7 +158,7 @@ class RoutingTests(unittest.TestCase):
              patch("sys.stdin", io.StringIO("prompt")), contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr):
             status = a.main([])
         self.assertEqual(status, 1)
-        self.assertEqual(calls.count(a.OLLAMA + "/api/generate"), 1)
+        self.assertEqual(sum(u.endswith("/api/generate") for u in calls), 1)
         self.assertNotIn(a.NVIDIA, calls)
 
     def test_cli_rejects_bad_prompt_before_network(self):
