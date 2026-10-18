@@ -10,7 +10,7 @@ O vídeo usa a voz do Noah para mostrar o fluxo: o agente principal consulta o C
 
 [![Capa estática do vídeo da arquitetura — clique para abrir o player](media/arquitetura-capa.jpg)](https://nicholasbirochi.github.io/Cerebro/)
 
-**[▶ Abrir o player (3min18s)](https://nicholasbirochi.github.io/Cerebro/)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
+**[▶ Abrir o player (1min40s)](https://nicholasbirochi.github.io/Cerebro/)** · [Baixar o vídeo](https://github.com/nicholasbirochi/Cerebro/raw/refs/heads/main/media/arquitetura.mp4)
 
 O vídeo só começa quando você clica em Play. O player oferece pausa, barra de tempo para avançar ou voltar, volume e tela cheia. A capa acima é estática; o MP4 original, com narração, foi mantido.
 
